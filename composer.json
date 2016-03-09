@@ -1,0 +1,24 @@
+{
+  "name": "sebaks/view",
+  "type": "library",
+  "authors": [
+    {
+      "name": "sebaks",
+      "email": "d.kirillof@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5",
+    "zendframework/zend-eventmanager": "^2.5",
+    "zendframework/zend-modulemanager": "^2.5",
+    "zendframework/zend-servicemanager": "^2.5",
+    "zendframework/zend-mvc": "^2.5",
+    "zendframework/zend-http": "^2.5",
+    "zendframework/zend-view": "^2.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Sebaks\\View\\": "src/"
+    }
+  }
+}
