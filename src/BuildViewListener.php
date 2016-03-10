@@ -112,6 +112,7 @@ class BuildViewListener extends AbstractListenerAggregate
         $viewModel->setName($requestedName);
         $viewModel->setTemplate($template);
         $viewModel->setVariables($variables);
+        $viewModel->prepare();
 
         foreach ($children as $childAlias => $child) {
 

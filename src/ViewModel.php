@@ -49,4 +49,12 @@ class ViewModel extends ZendViewModel
 
         return $this->children[$name];
     }
+
+    /**
+     *  For fetching and preparing dynamic data. Will call after variables will be set.
+     */
+    public function prepare()
+    {
+        // Empty
+    }
 }
