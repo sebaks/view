@@ -54,10 +54,13 @@ class BuildViewListener extends AbstractListenerAggregate
 
         $e->setResult($viewComponent);
 
-        $viewComponentLayout = $viewComponent->getVariable('layout');
+        if (!isset($options['contents'][$matchedRouteName]['layout'])) {
+            throw new \Exception("Missing required parameter 'layout' for view component '$matchedRouteName''");
+        }
 
+        $viewComponentLayout = $options['contents'][$matchedRouteName]['layout'];
         if (!isset($options['layouts'][$viewComponentLayout])) {
-            throw new \Exception("Layout not found for view component $matchedRouteName");
+            throw new \Exception("Layout '$viewComponentLayout' not found for view component '$matchedRouteName'");
         }
 
         $layout = $this->createViewModel($options['blocks'], $options['layouts'][$viewComponentLayout], $serviceLocator, $viewComponentLayout);
