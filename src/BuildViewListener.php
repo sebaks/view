@@ -76,15 +76,8 @@ class BuildViewListener extends AbstractListenerAggregate
 
     private function createViewModel(array $options, array $viewConfig, $serviceLocator, $requestedName)
     {
-        if (!empty($viewConfig['extend'])) {
-            if (!isset($options[$viewConfig['extend']])) {
-                throw new \Exception("View component $requestedName extend $viewConfig[extend] but it's configuration not found");
-            }
-
-            $extendView = $options[$viewConfig['extend']];
-
-            $viewConfig = array_replace_recursive($extendView, $viewConfig);
-        }
+        $config = new Config($options);
+        $viewConfig = $config->applyInheritance($viewConfig);
 
         if (empty($viewConfig['template'])) {
             throw new \Exception("Empty template for $requestedName");
