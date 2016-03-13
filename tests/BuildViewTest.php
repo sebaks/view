@@ -6,6 +6,8 @@ use Zend\View\Renderer\PhpRenderer;
 use Zend\View\Resolver;
 use Zend\View\Model\ViewModel;
 use Zend\View\View;
+use Zend\View\Strategy\PhpRendererStrategy;
+use Zend\Http\Response;
 
 class BuildViewTest extends \PHPUnit_Framework_TestCase
 {
@@ -16,8 +18,10 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
         $resolver = new Resolver\AggregateResolver();
 
         $map = new Resolver\TemplateMapResolver(array(
-            'layout'      => __DIR__ . '/view/layout.phtml',
-            'index/index' => __DIR__ . '/view/index/index.phtml',
+            'page'      => __DIR__ . '/view/page.phtml',
+            'comments-list' => __DIR__ . '/view/comments-list.phtml',
+            'comment' => __DIR__ . '/view/comment.phtml',
+            'user' => __DIR__ . '/view/user.phtml',
         ));
         $stack = new Resolver\TemplatePathStack(array(
             'script_paths' => array(
@@ -33,17 +37,107 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
         $renderer->setResolver($resolver);
 
         $view = new View();
+        $response = new Response();
+        $view->setResponse($response);
+        $strategy = new PhpRendererStrategy($renderer);
+        $strategy->attach($view->getEventManager());
 
-        $layoutViewModel = new ViewModel();
-        $layoutViewModel->setTemplate('layout');
+        /////////////////////////////////////////////////
 
+
+        $viewConfig = [
+            'page' => [
+                'template' => 'page',
+                'children' => [
+                    'comments-list' => [
+                        'template' => 'comments-list',
+                        'children' => [
+                            'comment' => [
+                                'viewModel' => 'Sebaks\ViewTest\CommentViewModel',
+                                'template' => 'comment',
+                                'children' => [
+                                    'user' => [
+                                        'viewModel' => 'Sebaks\ViewTest\UserViewModel',
+                                        'template' => 'user',
+                                        'requireDataFromParent' => 'userId',
+                                    ]
+                                ],
+                                'requireData' => 'comments',
+                            ],
+                        ],
+
+                    ]
+                ],
+            ],
+        ];
+
+        $data = [
+            'comments' => [
+                [
+                    'id' => 'c1',
+                    'userId' => 'u1',
+                    'text' => 'text of c1',
+                ],
+                [
+                    'id' => 'c2',
+                    'userId' => 'u2',
+                    'text' => 'text of c2',
+                ],
+            ],
+        ];
+
+        /////////////////////
+
+        $pageViewModel = $this->buildView('page', $viewConfig, $data);
+
+        /////////////////////
+
+
+        $view->render($pageViewModel);
+        $result = $response->getBody();
+
+
+        $this->assertEquals('<div><ul><li>text of c1<span>John</span></li><li>text of c2<span>Helen</span></li></ul></div>', $result);
+    }
+
+    private function buildView($route, array $viewConfig, $data)
+    {
         $viewModel = new ViewModel();
-        $viewModel->setTemplate('index/index');
+        $viewModel->setTemplate($viewConfig[$route]['template']);
 
-        $layoutViewModel->addChild($viewModel, 'content');
+        foreach ($viewConfig[$route]['children'] as $childName => $childOptions) {
+            $this->buildChildView($viewModel, $childName, $childOptions, $data);
+        }
 
-        $result = $renderer->render($layoutViewModel);
+        return $viewModel;
+    }
 
-        $this->assertEquals('<div></div>', $result);
+    private function buildChildView($parentViewModel, $name, array $options, $data)
+    {
+        if (isset($options['viewModel'])) {
+            $viewModel = new $options['viewModel']();
+        } else {
+            $viewModel = new ViewModel();
+        }
+
+        $viewModel->setTemplate($options['template']);
+
+        if (isset($options['requireData'])) {
+            $requireData = $data[$options['requireData']];
+            $viewModel->handleRequireData($requireData, $options, $parentViewModel);
+        }
+
+        if (isset($options['children'])) {
+
+            foreach ($options['children'] as $childName => $childOptions) {
+                $viewModel->addChild(
+                    $this->buildChildView($viewModel, $childName, $childOptions, $data)
+                );
+            }
+        }
+
+        $parentViewModel->addChild($viewModel, $name);
+
+        return $viewModel;
     }
 }
