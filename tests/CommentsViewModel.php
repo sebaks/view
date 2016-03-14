@@ -6,9 +6,11 @@ use Zend\View\Model\ViewModel;
 
 class CommentsViewModel extends ViewModel
 {
-    public function handleRequireData($data, $commentConfig, $parentViewModel)
+    private $data;
+
+    public function setRequireData($data)
     {
 
-        die(var_dump($data));
+        $this->data = $data;
     }
 }

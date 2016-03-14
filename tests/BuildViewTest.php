@@ -52,21 +52,7 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
                     'comments-list' => [
                         'viewModel' => 'Sebaks\ViewTest\CommentsViewModel',
                         'template' => 'comments-list',
-//                        'children' => [
-//                            ' ' => [
-//                                'viewModel' => 'Sebaks\ViewTest\CommentViewModel',
-//                                'template' => 'comment',
-//                                'children' => [
-//                                    'user' => [
-//                                        'viewModel' => 'Sebaks\ViewTest\UserViewModel',
-//                                        'template' => 'user',
-//                                        'requireDataFromParent' => 'userId',
-//                                    ]
-//                                ],
-//                                'requireDataFromParent' => 'userId',
-//                            ],
-//                        ],
-                        'childrenDynamicSet' => [
+                        'children' => [
                             'comment' => [
                                 'viewModel' => 'Sebaks\ViewTest\CommentViewModel',
                                 'template' => 'comment',
@@ -74,13 +60,19 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
                                     'user' => [
                                         'viewModel' => 'Sebaks\ViewTest\UserViewModel',
                                         'template' => 'user',
-                                        'requireDataFromParent' => 'userId',
+                                        'requireData' => 'userId',
                                     ]
                                 ],
-                                'requireDataFromParent' => 'userId',
+                                'requireData' => 'comment',
                             ],
-                            'requireData' => 'comments',
                         ],
+                        'dynamicLists' => [
+                            'comment' => [
+                                'list' => 'comments',
+                                'item' => 'comment',
+                            ],
+                        ],
+                        'requireData' => 'comments',
                     ]
                 ],
             ],
@@ -121,13 +113,14 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
         $viewModel->setTemplate($viewConfig[$route]['template']);
 
         foreach ($viewConfig[$route]['children'] as $childName => $childOptions) {
-            $this->buildChildView($viewModel, $childName, $childOptions, $data);
+            $child = $this->buildChildView($childOptions, $data);
+            $viewModel->addChild($child, $childName);
         }
 
         return $viewModel;
     }
 
-    private function buildChildView($parentViewModel, $name, array $options, $data)
+    private function buildChildView(array $options, $data)
     {
         if (isset($options['viewModel'])) {
             $viewModel = new $options['viewModel']();
@@ -139,19 +132,31 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
 
         if (isset($options['requireData'])) {
             $requireData = $data[$options['requireData']];
-            $viewModel->handleRequireData($requireData, $options, $parentViewModel);
+            $viewModel->setVariable($options['requireData'], $requireData);
         }
 
         if (isset($options['children'])) {
-
             foreach ($options['children'] as $childName => $childOptions) {
-                $viewModel->addChild(
-                    $this->buildChildView($viewModel, $childName, $childOptions, $data)
-                );
+
+                if (isset($options['dynamicLists'])) {
+                    if (($options['dynamicLists'][$childName])) {
+                        $listName = $options['dynamicLists'][$childName]['list'];
+                        $itemName = $options['dynamicLists'][$childName]['item'];
+
+                        $list = $viewModel->getVariable($listName);
+                        foreach ($list as $item) {
+                            $dataForChild = [$itemName => $item];
+                            $child = $this->buildChildView($childOptions, $dataForChild);
+
+                            $viewModel->addChild($child, $childName);
+                        }
+                    }
+                } else {
+                    $child = $this->buildChildView($childOptions, $data);
+                    $viewModel->addChild($child, $childName);
+                }
             }
         }
-
-        $parentViewModel->addChild($viewModel, $name);
 
         return $viewModel;
     }
