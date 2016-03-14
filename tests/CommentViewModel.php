@@ -16,18 +16,18 @@ class CommentViewModel extends ViewModel
             $commentViewModel->setVariable('text', $commentData['text']);
 
 
-            foreach ($commentConfig['children'] as $children => $childrenConfig) {
-
-                $userViewModel = new UserViewModel();
-                $userViewModel->setTemplate($childrenConfig['template']);
-                $commentViewModel->addChild($userViewModel, $children);
-
-                if (isset($childrenConfig['requireDataFromParent'])) {
-                    $dataForChild = $commentData[$childrenConfig['requireDataFromParent']];
-                    $userViewModel->handleRequireDataFromParent($dataForChild);
-                }
-            }
-
+//            foreach ($commentConfig['children'] as $children => $childrenConfig) {
+//
+//                $userViewModel = new UserViewModel();
+//                $userViewModel->setTemplate($childrenConfig['template']);
+//                $commentViewModel->addChild($userViewModel, $children);
+//
+//                if (isset($childrenConfig['requireDataFromParent'])) {
+//                    $dataForChild = $commentData[$childrenConfig['requireDataFromParent']];
+//                    $userViewModel->handleRequireDataFromParent($dataForChild);
+//                }
+//            }
+//
             $parentViewModel->addChild($commentViewModel, 'comment');
         }
     }

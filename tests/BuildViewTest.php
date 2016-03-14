@@ -50,8 +50,23 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
                 'template' => 'page',
                 'children' => [
                     'comments-list' => [
+                        'viewModel' => 'Sebaks\ViewTest\CommentsViewModel',
                         'template' => 'comments-list',
-                        'children' => [
+//                        'children' => [
+//                            ' ' => [
+//                                'viewModel' => 'Sebaks\ViewTest\CommentViewModel',
+//                                'template' => 'comment',
+//                                'children' => [
+//                                    'user' => [
+//                                        'viewModel' => 'Sebaks\ViewTest\UserViewModel',
+//                                        'template' => 'user',
+//                                        'requireDataFromParent' => 'userId',
+//                                    ]
+//                                ],
+//                                'requireDataFromParent' => 'userId',
+//                            ],
+//                        ],
+                        'childrenDynamicSet' => [
                             'comment' => [
                                 'viewModel' => 'Sebaks\ViewTest\CommentViewModel',
                                 'template' => 'comment',
@@ -62,10 +77,10 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
                                         'requireDataFromParent' => 'userId',
                                     ]
                                 ],
-                                'requireData' => 'comments',
+                                'requireDataFromParent' => 'userId',
                             ],
+                            'requireData' => 'comments',
                         ],
-
                     ]
                 ],
             ],
