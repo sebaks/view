@@ -35,6 +35,7 @@ class ViewBuilder
      */
     public function buildView(array $options, array $data = array(), $globalData = array())
     {
+        $allOptions = $this->config->getOptions();
         $options = $this->config->applyInheritance($options);
 
         if (isset($options['viewModel'])) {
@@ -76,6 +77,11 @@ class ViewBuilder
 
         if (isset($options['children'])) {
             foreach ($options['children'] as $childName => $childOptions) {
+
+                if (is_string($childOptions)) {
+                    $childName = $childOptions;
+                    $childOptions = $allOptions[$childName];
+                }
 
                 if (isset($options['dynamicLists'][$childName])) {
                     continue;

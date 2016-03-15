@@ -51,36 +51,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
             'page' => [
                 'template' => 'page',
                 'children' => [
-                    'comments-list' => [
-                        'template' => 'comments-list',
-                        'children' => [
-                            'comment' => [
-                                'viewModel' => \Sebaks\ViewTest\CommentViewModel::class,
-                                'template' => 'comment',
-                                'children' => [
-                                    'user' => [
-                                        'viewModel' => \Sebaks\ViewTest\UserViewModel::class,
-                                        'template' => 'user',
-                                        'data' => [
-                                            'fromParent' => 'userId', // will be set by calling getVariable('userId') from parent
-                                            'static' => [ // will be set as variables
-                                                'class' => 'user'
-                                            ],
-                                        ],
-                                    ]
-                                ],
-                                'data' => [
-                                    'fromParent' => 'comment', // will be set by calling getVariable('comment') from parent
-                                ],
-                            ],
-                        ],
-                        'dynamicLists' => [
-                            'comment' => 'comments', // Builder will create 'comment' views for every entry in 'comments' array
-                        ],
-                        'data' => [
-                            'fromGlobal' => 'comments', // // will be set as variables from global data
-                        ],
-                    ],
+                    'comments-list',
                     'comment-create' => [
                         'template' => 'comment-create',
                         'children' => [
@@ -103,6 +74,36 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
                             ],
                         ],
                     ],
+                ],
+            ],
+            'comments-list' => [
+                'template' => 'comments-list',
+                'children' => [
+                    'comment' => [
+                        'viewModel' => \Sebaks\ViewTest\CommentViewModel::class,
+                        'template' => 'comment',
+                        'children' => [
+                            'user' => [
+                                'viewModel' => \Sebaks\ViewTest\UserViewModel::class,
+                                'template' => 'user',
+                                'data' => [
+                                    'fromParent' => 'userId', // will be set by calling getVariable('userId') from parent
+                                    'static' => [ // will be set as variables
+                                        'class' => 'user'
+                                    ],
+                                ],
+                            ]
+                        ],
+                        'data' => [
+                            'fromParent' => 'comment', // will be set by calling getVariable('comment') from parent
+                        ],
+                    ],
+                ],
+                'dynamicLists' => [
+                    'comment' => 'comments', // Builder will create 'comment' views for every entry in 'comments' array
+                ],
+                'data' => [
+                    'fromGlobal' => 'comments', // // will be set as variables from global data
                 ],
             ],
         ];
