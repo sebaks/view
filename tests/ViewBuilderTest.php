@@ -9,6 +9,7 @@ use Zend\View\View;
 use Zend\View\Strategy\PhpRendererStrategy;
 use Zend\Http\Response;
 use Sebaks\View\ViewBuilder;
+use Sebaks\View\Config;
 
 class ViewBuilderTest extends \PHPUnit_Framework_TestCase
 {
@@ -60,7 +61,6 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
                                     'user' => [
                                         'viewModel' => \Sebaks\ViewTest\UserViewModel::class,
                                         'template' => 'user',
-                                        'requireDataFromParent' => 'userId',
                                         'data' => [
                                             'fromParent' => 'userId', // will be set by calling getVariable('userId') from parent
                                             'static' => [ // will be set as variables
@@ -78,7 +78,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
                             'comment' => 'comments', // Builder will create 'comment' views for every entry in 'comments' array
                         ],
                         'data' => [
-                            'fromGlobal' => 'comments',
+                            'fromGlobal' => 'comments', // // will be set as variables from global data
                         ],
                     ],
                     'comment-create' => [
@@ -122,9 +122,17 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
             ],
         ];
 
+        $serviceLocator = new \Zend\ServiceManager\ServiceManager();
+
+        $serviceLocator->setInvokableClass(\Sebaks\ViewTest\CommentViewModel::class, \Sebaks\ViewTest\CommentViewModel::class, false);
+        $serviceLocator->setInvokableClass(\Sebaks\ViewTest\UserViewModel::class, \Sebaks\ViewTest\UserViewModel::class, false);
+        $serviceLocator->setInvokableClass(\Sebaks\ViewTest\MyselfViewModel::class, \Sebaks\ViewTest\MyselfViewModel::class, false);
+
+
         /////////////////////
 
-        $viewBuilder = new ViewBuilder();
+        $config = new Config($viewConfig);
+        $viewBuilder = new ViewBuilder($config, $serviceLocator);
         $pageViewModel = $viewBuilder->buildView($viewConfig['page'], array(), $data);
 
         /////////////////////

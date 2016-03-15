@@ -3,13 +3,42 @@
 namespace Sebaks\View;
 
 use Zend\View\Model\ViewModel as ZendViewModel;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
 class ViewBuilder
 {
-    public function buildView(array $options, array $data = array(), $global = array())
+    /**
+     * @var Config
+     */
+    private $config;
+
+    /**
+     * @var ServiceLocatorInterface
+     */
+    private $serviceLocator;
+
+    /**
+     * @param Config $config
+     * @param ServiceLocatorInterface $serviceLocator
+     */
+    public function __construct(Config $config, ServiceLocatorInterface $serviceLocator)
     {
+        $this->config = $config;
+        $this->serviceLocator = $serviceLocator;
+    }
+
+    /**
+     * @param array $options
+     * @param array $data
+     * @param array $globalData
+     * @return ZendViewModel
+     */
+    public function buildView(array $options, array $data = array(), $globalData = array())
+    {
+        $options = $this->config->applyInheritance($options);
+
         if (isset($options['viewModel'])) {
-            $viewModel = new $options['viewModel']();
+            $viewModel = $this->serviceLocator->get($options['viewModel']);
         } else {
             $viewModel = new ZendViewModel();
         }
@@ -18,7 +47,7 @@ class ViewBuilder
         $viewModel->setVariables($data);
 
         if (isset($options['data']['fromGlobal'])) {
-            $dataFromGlobal = $global[$options['data']['fromGlobal']];
+            $dataFromGlobal = $globalData[$options['data']['fromGlobal']];
             $viewModel->setVariable($options['data']['fromGlobal'], $dataFromGlobal);
         }
 
@@ -34,7 +63,7 @@ class ViewBuilder
                     $dataFromParentName = $childOptions['data']['fromParent'];
                     $dataForChild = [$dataFromParentName => $entry];
 
-                    $childView = $this->buildView($childOptions, $dataForChild, $global);
+                    $childView = $this->buildView($childOptions, $dataForChild, $globalData);
 
                     $capture = $childName;
                     if (isset($childOptions['capture'])) {
@@ -65,7 +94,7 @@ class ViewBuilder
                     $dataForChild = array_merge($dataForChild, [$paramName => $fromParent]);
                 }
 
-                $child = $this->buildView($childOptions, $dataForChild, $global);
+                $child = $this->buildView($childOptions, $dataForChild, $globalData);
 
                 $capture = $childName;
                 if (isset($childOptions['capture'])) {
