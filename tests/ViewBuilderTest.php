@@ -8,8 +8,9 @@ use Zend\View\Model\ViewModel;
 use Zend\View\View;
 use Zend\View\Strategy\PhpRendererStrategy;
 use Zend\Http\Response;
+use Sebaks\View\ViewBuilder;
 
-class BuildViewTest extends \PHPUnit_Framework_TestCase
+class ViewBuilderTest extends \PHPUnit_Framework_TestCase
 {
     public function test()
     {
@@ -69,7 +70,7 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
                                     ]
                                 ],
                                 'data' => [
-                                    'fromParent' => 'comment', // will be set by calling getVariable('userId') from parent
+                                    'fromParent' => 'comment', // will be set by calling getVariable('comment') from parent
                                 ],
                             ],
                         ],
@@ -123,10 +124,10 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
 
         /////////////////////
 
-        $pageViewModel = $this->buildView('page', $viewConfig, $data);
+        $viewBuilder = new ViewBuilder();
+        $pageViewModel = $viewBuilder->buildView($viewConfig['page'], array(), $data);
 
         /////////////////////
-
 
         $view->render($pageViewModel);
         $result = $response->getBody();
@@ -136,90 +137,5 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
             .'<form><textarea></textarea><button type="submit">Submit</button></form>';
 
         $this->assertEquals($expected, $result);
-    }
-
-    private function buildView($route, array $viewConfig, $global = array())
-    {
-        $viewModel = new ViewModel();
-        $viewModel->setTemplate($viewConfig[$route]['template']);
-
-        foreach ($viewConfig[$route]['children'] as $childName => $childOptions) {
-            $child = $this->buildChildView($childOptions, array(), $global);
-            $viewModel->addChild($child, $childName);
-        }
-
-        return $viewModel;
-    }
-
-    private function buildChildView(array $options, $data, $global = array())
-    {
-        if (isset($options['viewModel'])) {
-            $viewModel = new $options['viewModel']();
-        } else {
-            $viewModel = new ViewModel();
-        }
-
-        $viewModel->setTemplate($options['template']);
-        $viewModel->setVariables($data);
-
-        if (isset($options['data']['fromGlobal'])) {
-            $dataFromGlobal = $global[$options['data']['fromGlobal']];
-            $viewModel->setVariable($options['data']['fromGlobal'], $dataFromGlobal);
-        }
-
-        if (isset($options['dynamicLists'])) {
-            foreach ($options['dynamicLists'] as $childName => $listName) {
-
-                $list = $viewModel->getVariable($listName);
-
-                $childOptions = $options['children'][$childName];
-
-                foreach ($list as $entry) {
-
-                    $dataFromParentName = $childOptions['data']['fromParent'];
-                    $dataForChild = [$dataFromParentName => $entry];
-
-                    $childView = $this->buildChildView($childOptions, $dataForChild);
-
-                    $capture = $childName;
-                    if (isset($childOptions['capture'])) {
-                        $capture = $childOptions['capture'];
-                    }
-                    $viewModel->addChild($childView, $capture);
-                }
-            }
-        }
-
-        if (isset($options['children'])) {
-            foreach ($options['children'] as $childName => $childOptions) {
-
-                if (isset($options['dynamicLists'][$childName])) {
-                    continue;
-                }
-
-                $dataForChild = [];
-
-                if (isset($childOptions['data']['static'])) {
-                    $dataForChild = array_merge($dataForChild, $childOptions['data']['static']);
-                }
-
-                if (isset($childOptions['data']['fromParent'])) {
-                    $paramName = $childOptions['data']['fromParent'];
-                    $fromParent = $viewModel->getVariable($paramName);
-
-                    $dataForChild = array_merge($dataForChild, [$paramName => $fromParent]);
-                }
-
-                $child = $this->buildChildView($childOptions, $dataForChild);
-
-                $capture = $childName;
-                if (isset($childOptions['capture'])) {
-                    $capture = $childOptions['capture'];
-                }
-                $viewModel->addChild($child, $capture);
-            }
-        }
-
-        return $viewModel;
     }
 }
