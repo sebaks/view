@@ -49,31 +49,63 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
             'page' => [
                 'template' => 'page',
                 'children' => [
-                    'comments-list' => [
-                        'viewModel' => 'Sebaks\ViewTest\CommentsViewModel',
+                    [
+                        'capture' => 'comments-list',
                         'template' => 'comments-list',
                         'children' => [
-                            'comment' => [
-                                'viewModel' => 'Sebaks\ViewTest\CommentViewModel',
+                            [
+                                'capture' => 'comment',
+                                'viewModel' => \Sebaks\ViewTest\CommentViewModel::class,
                                 'template' => 'comment',
                                 'children' => [
-                                    'user' => [
-                                        'viewModel' => 'Sebaks\ViewTest\UserViewModel',
+                                    [
+                                        'capture' => 'user',
+                                        'viewModel' => \Sebaks\ViewTest\UserViewModel::class,
                                         'template' => 'user',
-                                        'requireData' => 'userId',
+                                        'requireDataFromParent' => 'userId',
+                                        'data' => [
+                                            'fromParent' => 'userId', // will be set by calling getVariable('userId') from parent
+                                            'static' => [ // will be set as variables
+                                                'class' => 'user'
+                                            ],
+                                        ],
                                     ]
                                 ],
-                                'requireData' => 'comment',
+                                'data' => [
+                                    'fromParent' => 'comment', // will be set by calling getVariable('userId') from parent
+                                ],
                             ],
                         ],
                         'dynamicLists' => [
-                            'comment' => [
-                                'list' => 'comments',
-                                'item' => 'comment',
-                            ],
+                            'comment' => 'comments', // Builder will create 'comment' views for every entry in 'comments' array
                         ],
                         'requireData' => 'comments',
-                    ]
+                    ],
+                    [
+                        'capture' => 'comment-create',
+                        'template' => 'comment-create',
+                        'children' => [
+                            [
+                                'capture' => 'myself-info',
+                                'viewModel' => \Sebaks\ViewTest\MyselfViewModel::class,
+                                'template' => 'user',
+                            ],
+                            [
+                                'capture' => 'comment-create-form',
+                                'template' => 'form',
+                                'children' => [
+                                    [
+                                        'capture' => 'form-element',
+                                        'template' => 'form-element-textarea',
+                                    ],
+                                    [
+                                        'capture' => 'form-element',
+                                        'template' => 'form-element-button',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
             ],
         ];
@@ -103,8 +135,11 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
         $view->render($pageViewModel);
         $result = $response->getBody();
 
+        $expected = '<ul><li>text of c1<div class="user">John</div></li><li>text of c2<div class="user">Helen</div></li></ul>'
+            .'<div class="">Me</div>'
+            .'<form><textarea></textarea><button type="submit">Submit</button></form>';
 
-        $this->assertEquals('<div><ul><li>text of c1<span>John</span></li><li>text of c2<span>Helen</span></li></ul></div>', $result);
+        $this->assertEquals($expected, $result);
     }
 
     private function buildView($route, array $viewConfig, $data)
@@ -112,7 +147,8 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
         $viewModel = new ViewModel();
         $viewModel->setTemplate($viewConfig[$route]['template']);
 
-        foreach ($viewConfig[$route]['children'] as $childName => $childOptions) {
+        foreach ($viewConfig[$route]['children'] as $childOptions) {
+            $childName = $childOptions['capture'];
             $child = $this->buildChildView($childOptions, $data);
             $viewModel->addChild($child, $childName);
         }
@@ -136,16 +172,26 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
         }
 
         if (isset($options['children'])) {
-            foreach ($options['children'] as $childName => $childOptions) {
+            foreach ($options['children'] as $childOptions) {
+
+                $childName = $childOptions['capture'];
 
                 if (isset($options['dynamicLists'])) {
                     if (($options['dynamicLists'][$childName])) {
-                        $listName = $options['dynamicLists'][$childName]['list'];
-                        $itemName = $options['dynamicLists'][$childName]['item'];
+                        $listName = $options['dynamicLists'][$childName];
 
                         $list = $viewModel->getVariable($listName);
                         foreach ($list as $item) {
-                            $dataForChild = [$itemName => $item];
+                            //$dataForChild = [$itemName => $item];
+
+                            $dataForChild = [];
+                            if (isset($childOptions['data']['fromParent'])) {
+                                $paramName = $childOptions['data']['fromParent'];
+                                $dataForChild = [$paramName => $item];
+
+                                //$child->setVariable($paramName, $dataForChild);
+                            }
+
                             $child = $this->buildChildView($childOptions, $dataForChild);
 
                             $viewModel->addChild($child, $childName);
@@ -153,6 +199,20 @@ class BuildViewTest extends \PHPUnit_Framework_TestCase
                     }
                 } else {
                     $child = $this->buildChildView($childOptions, $data);
+
+                    if (isset($childOptions['data']['fromParent'])) {
+                        $paramName = $childOptions['data']['fromParent'];
+
+                        $dataForChild = $viewModel->getVariable($paramName);
+
+                        $child->setVariable($paramName, $dataForChild);
+                    }
+
+                    if (isset($childOptions['data']['static'])) {
+                        $staticData = $childOptions['data']['static'];
+                        $child->setVariables($staticData);
+                    }
+
                     $viewModel->addChild($child, $childName);
                 }
             }

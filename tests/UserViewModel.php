@@ -6,26 +6,31 @@ use Zend\View\Model\ViewModel;
 
 class UserViewModel extends ViewModel
 {
-    private static $userIds;
+    private static $userIds = [];
     private static $users;
 
-    private $userId;
-
-    public function handleRequireDataFromParent($dataForChild)
+    public function setVariable($name, $value)
     {
-        self::$userIds[] = $dataForChild;
-        $this->userId = $dataForChild;
+        if ($name == 'userId') {
+            self::$userIds[] = $value;
+        }
+
+        return parent::setVariable($name, $value);
     }
 
-    public function getName()
+    public function getVariable($name, $default = null)
     {
-        if (self::$users === null) {
-            self::$users = $this->fetchUsers(self::$userIds);
+        if ($name == 'name') {
+            if (self::$users === null) {
+                self::$users = $this->fetchUsers(self::$userIds);
+            }
+            $userId = $this->getVariable('userId');
+            if (isset(self::$users[$userId]['name'])) {
+                return self::$users[$userId]['name'];
+            }
         }
 
-        if (isset(self::$users[$this->userId]['name'])) {
-            return self::$users[$this->userId]['name'];
-        }
+        return parent::getVariable($name, $default);
     }
 
     private function fetchUsers()

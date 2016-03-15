@@ -6,29 +6,14 @@ use Zend\View\Model\ViewModel;
 
 class CommentViewModel extends ViewModel
 {
-    public function handleRequireData($data, $commentConfig, $parentViewModel)
+    public function getVariable($name, $default = null)
     {
-        foreach ($data as $commentData) {
+        if ($name == 'userId') {
+            $comment = $this->getVariable('comment');
 
-            $commentViewModel = new ViewModel();
-            $commentViewModel->setTemplate($commentConfig['template']);
-
-            $commentViewModel->setVariable('text', $commentData['text']);
-
-
-//            foreach ($commentConfig['children'] as $children => $childrenConfig) {
-//
-//                $userViewModel = new UserViewModel();
-//                $userViewModel->setTemplate($childrenConfig['template']);
-//                $commentViewModel->addChild($userViewModel, $children);
-//
-//                if (isset($childrenConfig['requireDataFromParent'])) {
-//                    $dataForChild = $commentData[$childrenConfig['requireDataFromParent']];
-//                    $userViewModel->handleRequireDataFromParent($dataForChild);
-//                }
-//            }
-//
-            $parentViewModel->addChild($commentViewModel, 'comment');
+            return $comment['userId'];
         }
+
+        return parent::getVariable($name, $default);
     }
 }
