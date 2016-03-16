@@ -52,8 +52,8 @@ class ViewBuilder
             $viewModel->setVariable($options['data']['fromGlobal'], $dataFromGlobal);
         }
 
-        if (isset($options['dynamicLists'])) {
-            foreach ($options['dynamicLists'] as $childName => $listName) {
+        if (isset($options['childrenDynamicLists'])) {
+            foreach ($options['childrenDynamicLists'] as $childName => $listName) {
 
                 $list = $viewModel->getVariable($listName);
 
@@ -83,7 +83,7 @@ class ViewBuilder
                     $childOptions = $allOptions[$childName];
                 }
 
-                if (isset($options['dynamicLists'][$childName])) {
+                if (isset($options['childrenDynamicLists'][$childName])) {
                     continue;
                 }
 
