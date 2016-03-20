@@ -99,6 +99,70 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
                             ],
                         ],
                     ],
+                    'users-table' => [
+                        'template' => 'table',
+                        'children' => [
+                            'table-head-rows' => [
+                                'template' => 'table-tr',
+                                'data' => [
+                                    'fromParent' => 'rows',
+                                ],
+                                'children' => [
+                                    'table-th' => [
+                                        'template' => 'table-th',
+                                        'capture' => 'table-td',
+                                        'data' => [
+                                            'fromParent' => 'value',
+                                        ],
+                                    ],
+                                ],
+                                'childrenDynamicLists' => [
+                                    'table-th' => 'rows',
+                                ],
+                            ],
+                            'table-body-rows' => [
+                                'template' => 'table-tr',
+                                'data' => [
+                                    'fromParent' => 'rows',
+                                ],
+                                'children' => [
+                                    'table-td' => [
+                                        'template' => 'table-td',
+                                        'data' => [
+                                            'fromParent' => 'value',
+                                        ],
+                                    ],
+                                ],
+                                'childrenDynamicLists' => [
+                                    'table-td' => 'rows',
+                                ],
+                            ],
+                        ],
+                        'childrenDynamicLists' => [
+                            'table-body-rows' => 'bodyRows',
+                            'table-head-rows' => 'headRows',
+                        ],
+                        'data' => [
+                            'static' => [
+                                'headRows' => [
+                                    [
+                                        'Id',
+                                        'Name'
+                                    ],
+                                ],
+                                'bodyRows' => [
+                                    [
+                                        '1',
+                                        'John',
+                                    ],
+                                    [
+                                        '2',
+                                        'Helen',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
             ],
             'comments-list' => [
@@ -168,7 +232,12 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
 
         $expected = '<ul><li>text of c1<div class="user">John</div></li><li>text of c2<div class="user">Helen</div></li></ul>'
             .'<div class="">Me</div>'
-            .'<form><textarea></textarea><button type="submit">Submit</button></form>';
+            .'<form><textarea></textarea><button type="submit">Submit</button></form><table>
+    <thead>
+        <tr><th>Id</th><th>Name</th></tr>    </thead>
+    <tbody>
+        <tr><td>1</td><td>John</td></tr><tr><td>2</td><td>Helen</td></tr>    </tbody>
+</table>';
 
         $this->assertEquals($expected, $result);
     }

@@ -47,6 +47,10 @@ class ViewBuilder
         $viewModel->setTemplate($options['template']);
         $viewModel->setVariables($data);
 
+        if (isset($options['data']['static'])) {
+            $viewModel->setVariables($options['data']['static']);
+        }
+
         if (isset($options['data']['fromGlobal'])) {
             $dataFromGlobal = $globalData[$options['data']['fromGlobal']];
             $viewModel->setVariable($options['data']['fromGlobal'], $dataFromGlobal);
@@ -57,10 +61,24 @@ class ViewBuilder
 
                 $list = $viewModel->getVariable($listName);
 
-                $childOptions = $options['children'][$childName];
+                if ($list === null) {
+                    throw new \UnexpectedValueException("Cannot build children list of '$childName' by '$listName' list . View does not contain variable '$listName'.");
+                }
+                if (!is_array($list)) {
+                    throw new \UnexpectedValueException("Cannot build children list of '$childName' by '$listName' list . List '$listName' must be array " . gettype($list) . " given.");
+                }
+
+                if (array_key_exists($childName, $options['children'])) {
+                    $childOptions = $options['children'][$childName];
+                } else {
+                    if (in_array($childName, $options['children'])) {
+                        $childOptions = $allOptions[$childName];
+                    } else {
+                        throw new \UnexpectedValueException("Cannot build children list of '$childName' by '$listName' list . Child '$childName' not found");
+                    }
+                }
 
                 foreach ($list as $entry) {
-
                     $dataFromParentName = $childOptions['data']['fromParent'];
                     $dataForChild = [$dataFromParentName => $entry];
 
