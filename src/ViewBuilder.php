@@ -76,7 +76,7 @@ class ViewBuilder
                 if ($list === null) {
                     throw new \UnexpectedValueException("Cannot build children list of '$childName' by '$listName' list . View does not contain variable '$listName'.");
                 }
-                if (!is_array($list)) {
+                if (!is_array($list) && !($list instanceof \Traversable)) {
                     throw new \UnexpectedValueException("Cannot build children list of '$childName' by '$listName' list . List '$listName' must be array " . gettype($list) . " given.");
                 }
 
