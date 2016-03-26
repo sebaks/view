@@ -206,7 +206,7 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
                         'comment' => 'comments', // Builder will create 'comment' views for every entry in 'comments' array
                     ],
                     'data' => [
-                        'fromGlobal' => 'comments', // // will be set as variables from global data
+                        'fromGlobal' => ['result' => 'comments'], // // will be set as variables from global data
                     ],
                 ],
             ],
@@ -214,7 +214,7 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
         ];
 
         $data = [
-            'comments' => [
+            'result' => [
                 [
                     'id' => 'c1',
                     'userId' => 'u1',

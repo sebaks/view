@@ -52,8 +52,20 @@ class ViewBuilder
         }
 
         if (isset($options['data']['fromGlobal'])) {
-            $dataFromGlobal = $globalData[$options['data']['fromGlobal']];
-            $viewModel->setVariable($options['data']['fromGlobal'], $dataFromGlobal);
+            $globalVar = $options['data']['fromGlobal'];
+
+            if (is_array($globalVar)) {
+                $globalVarName = key($globalVar);
+                $viewVarName = $globalVar[$globalVarName];
+
+                $globalVarValue = $globalData[$globalVarName];
+
+                $viewModel->setVariable($viewVarName, $globalVarValue);
+            } else {
+                $globalVarValue = $globalData[$globalVar];
+
+                $viewModel->setVariable($globalVar, $globalVarValue);
+            }
         }
 
         if (isset($options['childrenDynamicLists'])) {
