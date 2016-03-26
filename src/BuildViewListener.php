@@ -42,8 +42,11 @@ class BuildViewListener extends AbstractListenerAggregate
             return;
         }
 
-        $viewComponent = $this->createViewModel($options['blocks'], $options['contents'][$matchedRouteName], $serviceLocator, $matchedRouteName);
-        $viewComponent->setVariables($result->getVariables());
+        $config = new Config($options['blocks']);
+        $viewBuilder = new ViewBuilder($config, $serviceLocator);
+
+        $data = $result->getVariables();
+        $viewComponent = $viewBuilder->buildView($options['contents'][$matchedRouteName], [], $data);
 
         $response = $e->getResponse();
         if ($response->getStatusCode() != 200) {
@@ -63,82 +66,11 @@ class BuildViewListener extends AbstractListenerAggregate
             throw new \Exception("Layout '$viewComponentLayout' not found for view component '$matchedRouteName'");
         }
 
-        $layout = $this->createViewModel($options['blocks'], $options['layouts'][$viewComponentLayout], $serviceLocator, $viewComponentLayout);
-        $layout->pushChild($viewComponent, 'content');
+        $layout = $viewBuilder->buildView($options['layouts'][$viewComponentLayout]);
+
+        $layout->addChild($viewComponent, 'content');
         $layout->setTerminal(true);
 
         $e->setViewModel($layout);
-
-        /** @var \Zend\View\Renderer\PhpRenderer $renderer */
-        $renderer = $e->getApplication()->getServiceManager()->get('viewrenderer');
-        $renderer->setCanRenderTrees(true);
-    }
-
-    private function createViewModel(array $options, array $viewConfig, $serviceLocator, $requestedName)
-    {
-        $config = new Config($options);
-        $viewConfig = $config->applyInheritance($viewConfig);
-
-        if (empty($viewConfig['template'])) {
-            throw new \Exception("Empty template for $requestedName");
-        }
-
-        $template = $viewConfig['template'];
-
-        if (!empty($viewConfig['viewModel'])) {
-            $viewModelClass = $viewConfig['viewModel'];
-            $viewModel = $serviceLocator->get($viewModelClass);
-        } else {
-            $viewModel = new ViewModel();
-        }
-
-        $variables = [];
-        if (!empty($viewConfig['variables'])) {
-            $variables = $viewConfig['variables'];
-        }
-
-        $children = [];
-        if (!empty($viewConfig['children'])) {
-            $children = $viewConfig['children'];
-        }
-
-        $viewModel->setName($requestedName);
-        $viewModel->setTemplate($template);
-        $viewModel->setVariables($variables);
-        $viewModel->prepare();
-
-        foreach ($children as $childAlias => $child) {
-
-            if (is_array($child)) {
-
-                $childViewConfig = $child;
-
-                $childViewModel = $this->createViewModel($options, $childViewConfig, $serviceLocator, $childAlias);
-
-                if (!$childViewModel) {
-                    throw new \Exception("Cannot create child view '$child' for '$requestedName' view");
-                }
-
-                $viewModel->pushChild($childViewModel, $childAlias);
-
-            } elseif (is_string($child)) {
-
-                if (is_int($childAlias)) {
-                    $childAlias = $child;
-                }
-
-                if (!isset($options[$child])) {
-                    throw new \Exception("Cannot create child view '$child' for '$requestedName' view");
-                }
-                $childViewModel = $this->createViewModel($options, $options[$child], $serviceLocator, $childAlias);
-
-                $viewModel->pushChild($childViewModel, $childAlias);
-
-            } else {
-                throw new \Exception("Wrong child configuration for view $requestedName. It must be string or array.");
-            }
-        }
-
-        return $viewModel;
     }
 }
