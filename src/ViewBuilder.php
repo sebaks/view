@@ -91,8 +91,16 @@ class ViewBuilder
                 }
 
                 foreach ($list as $entry) {
-                    $dataFromParentName = $childOptions['data']['fromParent'];
-                    $dataForChild = [$dataFromParentName => $entry];
+                    $varFromParent = $childOptions['data']['fromParent'];
+
+                    if (is_array($varFromParent)) {
+                        $varFromParentName = key($varFromParent);
+                        $viewVarName = $varFromParent[$varFromParentName];
+
+                        $dataForChild = [$viewVarName => $entry];
+                    } else {
+                        $dataForChild = [$varFromParent => $entry];
+                    }
 
                     $childView = $this->buildView($childOptions, $dataForChild, $globalData);
 
@@ -124,10 +132,19 @@ class ViewBuilder
                 }
 
                 if (isset($childOptions['data']['fromParent'])) {
-                    $paramName = $childOptions['data']['fromParent'];
-                    $fromParent = $viewModel->getVariable($paramName);
+                    $varFromParent = $childOptions['data']['fromParent'];
 
-                    $dataForChild = array_merge($dataForChild, [$paramName => $fromParent]);
+                    if (is_array($varFromParent)) {
+                        $varFromParentName = key($varFromParent);
+                        $viewVarName = $varFromParent[$varFromParentName];
+
+                        $fromParentVal = $viewModel->getVariable($varFromParentName);
+                    } else {
+                        $viewVarName = $childOptions['data']['fromParent'];
+                        $fromParentVal = $viewModel->getVariable($viewVarName);
+                    }
+
+                    $dataForChild = array_merge($dataForChild, [$viewVarName => $fromParentVal]);
                 }
 
                 $child = $this->buildView($childOptions, $dataForChild, $globalData);

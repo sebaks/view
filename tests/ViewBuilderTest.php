@@ -184,7 +184,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
                             ]
                         ],
                         'data' => [
-                            'fromParent' => 'comment', // will be set by calling getVariable('comment') from parent
+                            'fromParent' => ['comment' =>'comment'], // will be set by calling getVariable('comment') from parent
                         ],
                     ],
                 ],
