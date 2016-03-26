@@ -3,7 +3,7 @@
 namespace Sebaks\View;
 
 use Zend\View\Model\ViewModel as ZendViewModel;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\ServiceManager\ServiceManager;
 
 class ViewBuilder
 {
@@ -13,15 +13,15 @@ class ViewBuilder
     private $config;
 
     /**
-     * @var ServiceLocatorInterface
+     * @var ServiceManager
      */
     private $serviceLocator;
 
     /**
      * @param Config $config
-     * @param ServiceLocatorInterface $serviceLocator
+     * @param ServiceManager $serviceLocator
      */
-    public function __construct(Config $config, ServiceLocatorInterface $serviceLocator)
+    public function __construct(Config $config, ServiceManager $serviceLocator)
     {
         $this->config = $config;
         $this->serviceLocator = $serviceLocator;
@@ -39,6 +39,7 @@ class ViewBuilder
         $options = $this->config->applyInheritance($options);
 
         if (isset($options['viewModel'])) {
+            $this->serviceLocator->setShared($options['viewModel'], false);
             $viewModel = $this->serviceLocator->get($options['viewModel']);
         } else {
             $viewModel = new ZendViewModel();
