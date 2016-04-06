@@ -198,7 +198,7 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
                                 ]
                             ],
                             'data' => [
-                                'fromParent' => 'comment', // will be set by calling getVariable('comment') from parent
+                                'fromParent' => ['foo' => 'bar', 'comment' => 'comment'], // will be set by calling getVariable('comment') from parent
                             ],
                         ],
                     ],
@@ -206,7 +206,7 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
                         'comment' => 'comments', // Builder will create 'comment' views for every entry in 'comments' array
                     ],
                     'data' => [
-                        'fromGlobal' => ['result' => 'comments'], // // will be set as variables from global data
+                        'fromGlobal' => ['foo' => 'bar', 'result' => 'comments'], // // will be set as variables from global data
                     ],
                 ],
             ],
