@@ -1,0 +1,6 @@
+<?php
+/** @var \Zend\View\Model\ViewModel $viewModel */
+$viewModel = $this->viewModel()->getCurrent();
+$comment = $viewModel->getVariable('comment');
+?>
+<li><?= $comment['text'] ?><?= $this->renderChildModel('user') ?></li>
