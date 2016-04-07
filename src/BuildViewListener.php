@@ -41,12 +41,14 @@ class BuildViewListener extends AbstractListenerAggregate
         if (!isset($options['contents'][$matchedRouteName])) {
             return;
         }
+        $viewConfig = $options['contents'][$matchedRouteName];
 
-        $config = new Config($options['blocks']);
+        $config = new Config(array_merge($options['layouts'], $options['contents'], $options['blocks']));
+        $viewConfig = $config->applyInheritance($viewConfig);
         $viewBuilder = new ViewBuilder($config, $serviceLocator);
-
         $data = $result->getVariables();
-        $viewComponent = $viewBuilder->buildView($options['contents'][$matchedRouteName], [], $data);
+
+        $viewComponent = $viewBuilder->buildView($viewConfig, [], $data);
 
         $response = $e->getResponse();
         if ($response->getStatusCode() != 200) {
@@ -57,11 +59,11 @@ class BuildViewListener extends AbstractListenerAggregate
 
         $e->setResult($viewComponent);
 
-        if (!isset($options['contents'][$matchedRouteName]['layout'])) {
+        if (!isset($viewConfig['layout'])) {
             throw new \Exception("Missing required parameter 'layout' for view component '$matchedRouteName''");
         }
 
-        $viewComponentLayout = $options['contents'][$matchedRouteName]['layout'];
+        $viewComponentLayout = $viewConfig['layout'];
         if (!isset($options['layouts'][$viewComponentLayout])) {
             throw new \Exception("Layout '$viewComponentLayout' not found for view component '$matchedRouteName'");
         }
