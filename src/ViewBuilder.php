@@ -136,7 +136,16 @@ class ViewBuilder
                         foreach ($varFromParent as $varFromParentName => $viewVarName) {
                             $fromParentVal = $viewModel->getVariable($varFromParentName);
 
-                            $dataForChild = array_merge($dataForChild, [$viewVarName => $fromParentVal]);
+                            if (is_array($viewVarName)) {
+                                $dataFromParent = [];
+                                foreach ($viewVarName as $varName) {
+                                    $dataFromParent[$varName] = $fromParentVal;
+                                }
+                            } else {
+                                $dataFromParent = [$viewVarName => $fromParentVal];
+                            }
+
+                            $dataForChild = array_merge($dataForChild, $dataFromParent);
                         }
                     } else {
                         $viewVarName = $childOptions['data']['fromParent'];
