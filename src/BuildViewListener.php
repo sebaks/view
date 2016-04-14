@@ -28,6 +28,11 @@ class BuildViewListener extends AbstractListenerAggregate
             return;
         }
 
+        $response = $e->getResponse();
+        if ($response->getStatusCode() != 200) {
+            return;
+        }
+
         $matchedRoute = $e->getRouteMatch();
         if (!$matchedRoute) {
             return;
@@ -48,31 +53,21 @@ class BuildViewListener extends AbstractListenerAggregate
         $viewBuilder = new ViewBuilder($config, $serviceLocator);
         $data = $result->getVariables();
 
-        $viewComponent = $viewBuilder->buildView($viewConfig, [], $data);
-
-        $response = $e->getResponse();
-        if ($response->getStatusCode() != 200) {
-            if ($result->getTemplate()) {
-                $viewComponent->setTemplate($result->getTemplate());
-            }
-        }
-
-        $e->setResult($viewComponent);
-
         if (isset($viewConfig['layout'])) {
             $viewComponentLayout = $viewConfig['layout'];
             if (!isset($options['layouts'][$viewComponentLayout])) {
                 throw new \Exception("Layout '$viewComponentLayout' not found for view component '$matchedRouteName'");
             }
 
-            $layout = $viewBuilder->buildView($options['layouts'][$viewComponentLayout]);
+            $options['layouts'][$viewComponentLayout]['children']['content'] = $viewConfig;
 
-            $layout->addChild($viewComponent, 'content');
-            $layout->setTerminal(true);
-            $e->setViewModel($layout);
+            $viewComponent = $viewBuilder->buildView($options['layouts'][$viewComponentLayout], [], $data);
         } else {
-            $viewComponent->setTerminal(true);
-            $e->setViewModel($viewComponent);
+            $viewComponent = $viewBuilder->buildView($viewConfig, [], $data);
         }
+
+        $viewComponent->setTerminal(true);
+        $e->setViewModel($viewComponent);
+        $e->setResult($viewComponent);
     }
 }
