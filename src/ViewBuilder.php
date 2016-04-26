@@ -157,12 +157,20 @@ class ViewBuilder
 
                 $child = $this->buildView($childOptions, $dataForChild, $globalData);
 
-                $capture = $childName;
-                if (isset($childOptions['capture'])) {
-                    $capture = $childOptions['capture'];
+                if ('content' === $child->captureTo()) {
+                    $capture = $childName;
+                    if (isset($childOptions['capture'])) {
+                        $capture = $childOptions['capture'];
+                    }
+                } else {
+                    $capture = $child->captureTo();
                 }
                 $viewModel->addChild($child, $capture);
             }
+        }
+
+        if (method_exists($viewModel, 'initialize')) {
+            $viewModel->initialize();
         }
 
         return $viewModel;
