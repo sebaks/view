@@ -210,7 +210,6 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
                     ],
                 ],
             ],
-
         ];
 
         $data = [

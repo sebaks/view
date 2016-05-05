@@ -27,6 +27,21 @@ class ViewBuilder
         $this->serviceLocator = $serviceLocator;
     }
 
+    private function getVarValue($varName, $data)
+    {
+        if (strpos($varName, ':') !== false) {
+            list($varArrayName, $varNameInArray) = explode(':', $varName);
+
+            if (isset($data[$varArrayName][$varNameInArray])) {
+                return $data[$varArrayName][$varNameInArray];
+            }
+        }
+
+        if (isset($data[$varName])) {
+            return $data[$varName];
+        }
+    }
+
     /**
      * @param array $options
      * @param array $data
@@ -57,12 +72,11 @@ class ViewBuilder
 
             if (is_array($globalVar)) {
                 foreach ($globalVar as $globalVarName => $viewVarName) {
-                    $globalVarValue = $globalData[$globalVarName];
+                    $globalVarValue = $this->getVarValue($globalVarName, $globalData);
                     $viewModel->setVariable($viewVarName, $globalVarValue);
                 }
             } else {
-                $globalVarValue = $globalData[$globalVar];
-
+                $globalVarValue = $this->getVarValue($globalVar, $globalData);
                 $viewModel->setVariable($globalVar, $globalVarValue);
             }
         }
@@ -134,7 +148,10 @@ class ViewBuilder
 
                     if (is_array($varFromParent)) {
                         foreach ($varFromParent as $varFromParentName => $viewVarName) {
-                            $fromParentVal = $viewModel->getVariable($varFromParentName);
+                            $parentVars = [
+                                $varFromParentName => $viewModel->getVariable($varFromParentName)
+                            ];
+                            $fromParentVal = $this->getVarValue($varFromParentName, $parentVars);
 
                             if (is_array($viewVarName)) {
                                 $dataFromParent = [];
@@ -149,7 +166,10 @@ class ViewBuilder
                         }
                     } else {
                         $viewVarName = $childOptions['data']['fromParent'];
-                        $fromParentVal = $viewModel->getVariable($viewVarName);
+                        $parentVars = [
+                            $viewVarName => $viewModel->getVariable($viewVarName)
+                        ];
+                        $fromParentVal = $this->getVarValue($viewVarName, $parentVars);
 
                         $dataForChild = array_merge($dataForChild, [$viewVarName => $fromParentVal]);
                     }
