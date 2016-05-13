@@ -145,13 +145,17 @@ class ViewBuilder
 
                 if (isset($childOptions['data']['fromParent'])) {
                     $varFromParent = $childOptions['data']['fromParent'];
+                    $parentVars = $viewModel->getVariables();
 
                     if (is_array($varFromParent)) {
+
                         foreach ($varFromParent as $varFromParentName => $viewVarName) {
-                            $parentVars = [
-                                $varFromParentName => $viewModel->getVariable($varFromParentName)
-                            ];
+
                             $fromParentVal = $this->getVarValue($varFromParentName, $parentVars);
+
+                            if ($fromParentVal === null) {
+                                $fromParentVal = $viewModel->getVariable($varFromParentName);
+                            }
 
                             if (is_array($viewVarName)) {
                                 $dataFromParent = [];
@@ -166,10 +170,11 @@ class ViewBuilder
                         }
                     } else {
                         $viewVarName = $childOptions['data']['fromParent'];
-                        $parentVars = [
-                            $viewVarName => $viewModel->getVariable($viewVarName)
-                        ];
                         $fromParentVal = $this->getVarValue($viewVarName, $parentVars);
+
+                        if ($fromParentVal === null) {
+                            $fromParentVal = $viewModel->getVariable($viewVarName);
+                        }
 
                         $dataForChild = array_merge($dataForChild, [$viewVarName => $fromParentVal]);
                     }
