@@ -9,13 +9,48 @@ In our conception view contains 3 parts:
 - Contents (One page template - for display one URI)
 - Blocks (Some functional piece of view - many blocks for one URI)
 
-Each part can contain this fields:
-- `extend` - allow extend from other template, and override any other field
-- `layout` - (make sense only in `contents`) - define layout for template
-- `template` - template name
-- `viewModel` - viewModel, which contain view logic and can ba accessed in template by `$this->viewModel()->getCurrent()`
-- `variables` - any static variable, can set when config build, will be added to `ViewModel`
-- `children` - other blocks, for rendering it anywhere in current template `$this->renderChildModel(‘child-name’)`
+Each `block` contain:
+
+```php
+'admin-show-list' => [
+  'extend' => 'admin-list',
+  'layout' => 'admin-layout',
+  'template' => 't4web-admin/content/list',
+  'viewModel' => 'Shows\Action\Admin\Show\CreateAction\ListViewModel',
+  'childrenDynamicLists' => [/*...*/],
+  'data' => [/*...*/],
+  'children' => [/*...*/],
+],
+```
+
+if exists key `extend` - other key not required and will be inherited from parent view. Each key will be
+merged with parent. You can describe some blocks one time and reuse it anywhere.
+
+#### Block options
+
+- `extend` - describe parent view, all config key will be inherited and merged with current config
+- `layout` - define page layout name, it's can sense only for `contents` not `blocks` (because `layout` can 
+  sense for whole route\uri)
+- `template` - template name for current block
+- `viewModel` - specific ViewModel for current block (it can hide complex view logic for current block)
+- `childrenDynamicLists` - 
+- `data` - array for variables in view. `data` can be `data['static']` and `data['fromGlobal']`. 
+  - `data['static']` - static variables, for example labels, icons, some text etc.
+  - `data['fromGlobal']` - dynamic data, wich can be fetched by controller.
+- `children` - desribe child blocks, which describe as block and will be acessed like property in template:
+
+  ```php
+  <div class="box">
+      <div class="box-body no-padding">
+          <?= $this->table ?>
+      </div>
+      <div class="box-footer">
+          <?= $this->paginator ?>
+      </div>
+  </div>
+  ```
+  
+  in this case `table` and `paginator` will be render like child block.
 
 Config must be in key `sebaks-view`.
 
@@ -23,7 +58,7 @@ Each key in `contents` - route name.
 
 ## Example config
 
-Some where in your `module.config.php`
+Somewhere in your `module.config.php`
 
 ```php
 'sebaks-view' => [
