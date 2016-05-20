@@ -63,6 +63,10 @@ class ViewBuilder
         $viewModel->setTemplate($options['template']);
         $viewModel->setVariables($data);
 
+        if (isset($options['capture'])) {
+            $viewModel->setCaptureTo($options['capture']);
+        }
+
         if (isset($options['data']['static'])) {
             $viewModel->setVariables($options['data']['static']);
         }
