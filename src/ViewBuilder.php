@@ -120,7 +120,7 @@ class ViewBuilder
                     if (isset($childOptions['capture'])) {
                         $capture = $childOptions['capture'];
                     }
-                    $viewModel->addChild($childView, $capture);
+                    $viewModel->addChild($childView, $capture, true);
                 }
             }
         }
@@ -190,7 +190,7 @@ class ViewBuilder
                 } else {
                     $capture = $child->captureTo();
                 }
-                $viewModel->addChild($child, $capture);
+                $viewModel->addChild($child, $capture, true);
             }
         }
 
