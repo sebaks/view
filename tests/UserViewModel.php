@@ -20,30 +20,40 @@ class UserViewModel extends ViewModel
 
     public function getVariable($name, $default = null)
     {
-        if ($name == 'name') {
+        if ($name == 'name' || $name == 'countryId') {
             if (self::$users === null) {
                 self::$users = $this->fetchUsers(self::$userIds);
             }
             $userId = $this->getVariable('userId');
-            if (isset(self::$users[$userId]['name'])) {
-                return self::$users[$userId]['name'];
+            if (isset(self::$users[$userId][$name])) {
+                return self::$users[$userId][$name];
             }
         }
 
         return parent::getVariable($name, $default);
     }
 
-    private function fetchUsers()
+    private function fetchUsers($userIds)
     {
-        return [
+        $users = [
             'u1' => [
                 'id' => 'u1',
                 'name' => 'John',
+                'countryId' => '1',
             ],
             'u2' => [
                 'id' => 'u2',
                 'name' => 'Helen',
+                'countryId' => '2',
             ],
         ];
+
+        $result = [];
+        foreach ($userIds as $userId) {
+            if (isset($users[$userId])) {
+                $result[$userId] = $users[$userId];
+            }
+        }
+        return $result;
     }
 }
