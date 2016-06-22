@@ -45,7 +45,14 @@ class ViewBuilder
             $viewModel = new ZendViewModel();
         }
 
-        $viewModel->setTemplate($options['template']);
+        if (isset($options['template'])) {
+            $viewModel->setTemplate($options['template']);
+        }
+
+        if (isset($options['capture'])) {
+            $viewModel->setCaptureTo($options['capture']);
+        }
+
         $viewModel->setVariables($data);
 
         if (isset($options['data']['static'])) {
@@ -57,13 +64,16 @@ class ViewBuilder
 
             if (is_array($globalVar)) {
                 foreach ($globalVar as $globalVarName => $viewVarName) {
-                    $globalVarValue = $globalData[$globalVarName];
-                    $viewModel->setVariable($viewVarName, $globalVarValue);
+                    if (isset($globalData[$globalVarName])) {
+                        $globalVarValue = $globalData[$globalVarName];
+                        $viewModel->setVariable($viewVarName, $globalVarValue);
+                    }
                 }
             } else {
-                $globalVarValue = $globalData[$globalVar];
-
-                $viewModel->setVariable($globalVar, $globalVarValue);
+                if (isset($globalData[$globalVar])) {
+                    $globalVarValue = $globalData[$globalVar];
+                    $viewModel->setVariable($globalVar, $globalVarValue);
+                }
             }
         }
 
