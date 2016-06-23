@@ -27,6 +27,21 @@ class ViewBuilder
         $this->serviceLocator = $serviceLocator;
     }
 
+    private function getVarValue($varName, $data)
+    {
+        if (strpos($varName, ':') !== false) {
+            list($varArrayName, $varNameInArray) = explode(':', $varName);
+
+            if (isset($data[$varArrayName][$varNameInArray])) {
+                return $data[$varArrayName][$varNameInArray];
+            }
+        }
+
+        if (isset($data[$varName])) {
+            return $data[$varName];
+        }
+    }
+
     /**
      * @param array $options
      * @param array $data
@@ -64,16 +79,81 @@ class ViewBuilder
 
             if (is_array($globalVar)) {
                 foreach ($globalVar as $globalVarName => $viewVarName) {
-                    if (isset($globalData[$globalVarName])) {
-                        $globalVarValue = $globalData[$globalVarName];
-                        $viewModel->setVariable($viewVarName, $globalVarValue);
-                    }
+                    $globalVarValue = $this->getVarValue($globalVarName, $globalData);
+                    $viewModel->setVariable($viewVarName, $globalVarValue);
                 }
             } else {
-                if (isset($globalData[$globalVar])) {
-                    $globalVarValue = $globalData[$globalVar];
-                    $viewModel->setVariable($globalVar, $globalVarValue);
+                $globalVarValue = $this->getVarValue($globalVar, $globalData);
+                $viewModel->setVariable($globalVar, $globalVarValue);
+            }
+        }
+
+        if (isset($options['children'])) {
+            foreach ($options['children'] as $childName => $childOptions) {
+
+                if (is_string($childOptions)) {
+                    $childName = $childOptions;
+                    $childOptions = $allOptions[$childName];
                 }
+
+                if (isset($options['childrenDynamicLists'][$childName])) {
+                    continue;
+                }
+
+                $dataForChild = [];
+
+                if (isset($childOptions['data']['static'])) {
+                    $dataForChild = array_merge($dataForChild, $childOptions['data']['static']);
+                }
+
+                if (isset($childOptions['data']['fromParent'])) {
+                    $varFromParent = $childOptions['data']['fromParent'];
+                    $parentVars = $viewModel->getVariables();
+
+                    if (is_array($varFromParent)) {
+
+                        foreach ($varFromParent as $varFromParentName => $viewVarName) {
+
+                            $fromParentVal = $this->getVarValue($varFromParentName, $parentVars);
+
+                            if ($fromParentVal === null) {
+                                $fromParentVal = $viewModel->getVariable($varFromParentName);
+                            }
+
+                            if (is_array($viewVarName)) {
+                                $dataFromParent = [];
+                                foreach ($viewVarName as $varName) {
+                                    $dataFromParent[$varName] = $fromParentVal;
+                                }
+                            } else {
+                                $dataFromParent = [$viewVarName => $fromParentVal];
+                            }
+
+                            $dataForChild = array_merge($dataForChild, $dataFromParent);
+                        }
+                    } else {
+                        $viewVarName = $childOptions['data']['fromParent'];
+                        $fromParentVal = $this->getVarValue($viewVarName, $parentVars);
+
+                        if ($fromParentVal === null) {
+                            $fromParentVal = $viewModel->getVariable($viewVarName);
+                        }
+
+                        $dataForChild = array_merge($dataForChild, [$viewVarName => $fromParentVal]);
+                    }
+                }
+
+                $child = $this->buildView($childOptions, $dataForChild, $globalData);
+
+                if ('content' === $child->captureTo()) {
+                    $capture = $childName;
+                    if (isset($childOptions['capture'])) {
+                        $capture = $childOptions['capture'];
+                    }
+                } else {
+                    $capture = $child->captureTo();
+                }
+                $viewModel->addChild($child, $capture, true);
             }
         }
 
@@ -100,14 +180,17 @@ class ViewBuilder
                 }
 
                 foreach ($list as $entry) {
-                    $varFromParent = $childOptions['data']['fromParent'];
+                    $dataForChild = [];
+                    if (isset($childOptions['data']['fromParent'])) {
+                        $varFromParent = $childOptions['data']['fromParent'];
 
-                    if (is_array($varFromParent)) {
-                        foreach ($varFromParent as $varFromParentName => $viewVarName) {
-                            $dataForChild = [$viewVarName => $entry];
+                        if (is_array($varFromParent)) {
+                            foreach ($varFromParent as $varFromParentName => $viewVarName) {
+                                $dataForChild = [$viewVarName => $entry];
+                            }
+                        } else {
+                            $dataForChild = [$varFromParent => $entry];
                         }
-                    } else {
-                        $dataForChild = [$varFromParent => $entry];
                     }
 
                     $childView = $this->buildView($childOptions, $dataForChild, $globalData);
@@ -116,54 +199,13 @@ class ViewBuilder
                     if (isset($childOptions['capture'])) {
                         $capture = $childOptions['capture'];
                     }
-                    $viewModel->addChild($childView, $capture);
+                    $viewModel->addChild($childView, $capture, true);
                 }
             }
         }
 
-        if (isset($options['children'])) {
-            foreach ($options['children'] as $childName => $childOptions) {
-
-                if (is_string($childOptions)) {
-                    $childName = $childOptions;
-                    $childOptions = $allOptions[$childName];
-                }
-
-                if (isset($options['childrenDynamicLists'][$childName])) {
-                    continue;
-                }
-
-                $dataForChild = [];
-
-                if (isset($childOptions['data']['static'])) {
-                    $dataForChild = array_merge($dataForChild, $childOptions['data']['static']);
-                }
-
-                if (isset($childOptions['data']['fromParent'])) {
-                    $varFromParent = $childOptions['data']['fromParent'];
-
-                    if (is_array($varFromParent)) {
-                        foreach ($varFromParent as $varFromParentName => $viewVarName) {
-                            $fromParentVal = $viewModel->getVariable($varFromParentName);
-
-                            $dataForChild = array_merge($dataForChild, [$viewVarName => $fromParentVal]);
-                        }
-                    } else {
-                        $viewVarName = $childOptions['data']['fromParent'];
-                        $fromParentVal = $viewModel->getVariable($viewVarName);
-
-                        $dataForChild = array_merge($dataForChild, [$viewVarName => $fromParentVal]);
-                    }
-                }
-
-                $child = $this->buildView($childOptions, $dataForChild, $globalData);
-
-                $capture = $childName;
-                if (isset($childOptions['capture'])) {
-                    $capture = $childOptions['capture'];
-                }
-                $viewModel->addChild($child, $capture);
-            }
+        if (method_exists($viewModel, 'initialize')) {
+            $viewModel->initialize();
         }
 
         return $viewModel;

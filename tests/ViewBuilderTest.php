@@ -39,155 +39,73 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
     ];
     */
 
-//    public function testViewModel()
-//    {
-//        $config = [
-//            'someView' => [
-//                'viewModel' => CustomViewModel::class,
-//            ],
-//        ];
-//
-//        $serviceLocator = new ServiceManager();
-//        $serviceLocator->setInvokableClass(CustomViewModel::class, CustomViewModel::class, false);
-//
-//        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
-//        $viewModel = $viewBuilder->buildView($config['someView']);
-//
-//        $this->assertInstanceOf(CustomViewModel::class, $viewModel);
-//    }
-//
-//    public function testTemplate()
-//    {
-//        $config = [
-//            'someView' => [
-//                'template' => 'some-template',
-//            ],
-//        ];
-//
-//        $serviceLocator = new ServiceManager();
-//        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
-//
-//        $viewModel = $viewBuilder->buildView($config['someView']);
-//
-//        $this->assertEquals('some-template', $viewModel->getTemplate());
-//    }
-//
-//    public function testCapture()
-//    {
-//        $config = [
-//            'someView' => [
-//                'capture' => 'someCapture',
-//            ],
-//        ];
-//
-//        $serviceLocator = new ServiceManager();
-//        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
-//
-//        $viewModel = $viewBuilder->buildView($config['someView']);
-//
-//        $this->assertEquals('someCapture', $viewModel->captureTo());
-//    }
-//
-//    public function testSetStaticVariables()
-//    {
-//        $config = [
-//            'someView' => [
-//                'data' => [
-//                    'static' => [
-//                        'some' => 'data'
-//                    ],
-//                ],
-//            ],
-//        ];
-//
-//        $serviceLocator = new ServiceManager();
-//        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
-//
-//        $viewModel = $viewBuilder->buildView($config['someView']);
-//
-//        $this->assertEquals('data', $viewModel->getVariable('some'));
-//    }
-//
-//    public function testSetVariablesFromGlobalSetNull()
-//    {
-//        $config = [
-//            'someView' => [
-//                'data' => [
-//                    'fromGlobal' => [
-//                        'nameInGlobal' => 'nameInView'
-//                    ],
-//                ],
-//            ],
-//        ];
-//
-//        $serviceLocator = new ServiceManager();
-//        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
-//
-//        $viewModel = $viewBuilder->buildView($config['someView']);
-//
-//        $this->assertEquals(null, $viewModel->getVariable('nameInView'));
-//    }
-//
-//    public function testSetVariablesFromGlobalAsArray()
-//    {
-//        $config = [
-//            'someView' => [
-//                'data' => [
-//                    'fromGlobal' => [
-//                        'nameInGlobal' => 'nameInView'
-//                    ],
-//                ],
-//            ],
-//        ];
-//
-//        $globalData = [
-//            'nameInGlobal' => 'xxx'
-//        ];
-//
-//        $serviceLocator = new ServiceManager();
-//        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
-//
-//        $viewModel = $viewBuilder->buildView($config['someView'], [], $globalData);
-//
-//        $this->assertEquals('xxx', $viewModel->getVariable('nameInView'));
-//    }
-//
-//    public function testSetVariablesFromGlobalAsString()
-//    {
-//        $config = [
-//            'someView' => [
-//                'data' => [
-//                    'fromGlobal' => 'nameInGlobal',
-//                ],
-//            ],
-//        ];
-//
-//        $globalData = [
-//            'nameInGlobal' => 'xxx'
-//        ];
-//
-//        $serviceLocator = new ServiceManager();
-//        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
-//
-//        $viewModel = $viewBuilder->buildView($config['someView'], [], $globalData);
-//
-//        $this->assertEquals('xxx', $viewModel->getVariable('nameInGlobal'));
-//    }
+    public function testViewModel()
+    {
+        $config = [
+            'someView' => [
+                'viewModel' => CustomViewModel::class,
+            ],
+        ];
 
-    public function testSetVariablesFromGlobalAsKeyFromArray()
+        $serviceLocator = new ServiceManager();
+        $serviceLocator->setInvokableClass(CustomViewModel::class, CustomViewModel::class, false);
+
+        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
+        $viewModel = $viewBuilder->buildView($config['someView']);
+
+        $this->assertInstanceOf(CustomViewModel::class, $viewModel);
+    }
+
+    public function testTemplate()
+    {
+        $config = [
+            'someView' => [
+                'template' => 'some-template',
+            ],
+        ];
+
+        $serviceLocator = new ServiceManager();
+        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
+
+        $viewModel = $viewBuilder->buildView($config['someView']);
+
+        $this->assertEquals('some-template', $viewModel->getTemplate());
+    }
+
+    public function testCapture()
+    {
+        $config = [
+            'someView' => [
+                'capture' => 'someCapture',
+            ],
+        ];
+
+        $serviceLocator = new ServiceManager();
+        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
+
+        $viewModel = $viewBuilder->buildView($config['someView']);
+
+        $this->assertEquals('someCapture', $viewModel->captureTo());
+    }
+
+    public function testData()
     {
         $config = [
             'someView' => [
                 'data' => [
+                    'static' => [
+                        'staticVar' => 'staticVarValue',
+                    ],
                     'fromGlobal' => [
-                        'nameInGlobal:xxx' => 'nameInView'
+                        'globalVar' => 'globalVar',
+                        'nameInGlobal:xxx' => 'nameInView',
                     ],
                 ],
             ],
         ];
-
         $globalData = [
-            'nameInGlobal' => ['xxx' => 'yyy']
+            'globalVar' => 'globalVarValue',
+            'nameInGlobal' => ['xxx' => 'yyy'],
         ];
 
         $serviceLocator = new ServiceManager();
@@ -195,237 +113,422 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
 
         $viewModel = $viewBuilder->buildView($config['someView'], [], $globalData);
 
+        $this->assertEquals('staticVarValue', $viewModel->getVariable('staticVar'));
+        $this->assertEquals('globalVarValue', $viewModel->getVariable('globalVar'));
         $this->assertEquals('yyy', $viewModel->getVariable('nameInView'));
     }
 
-//    public function test()
-//    {
-//        $renderer = new PhpRenderer();
-//
-//        $resolver = new Resolver\AggregateResolver();
-//
-//        $map = new Resolver\TemplateMapResolver(array(
-//            'page'      => __DIR__ . '/view/page.phtml',
-//            'comments-list' => __DIR__ . '/view/comments-list.phtml',
-//            'comment' => __DIR__ . '/view/comment.phtml',
-//            'user' => __DIR__ . '/view/user.phtml',
-//        ));
-//        $stack = new Resolver\TemplatePathStack(array(
-//            'script_paths' => array(
-//                __DIR__ . '/view',
-//            )
-//        ));
-//
-//        $resolver->attach($map)
-//            ->attach($stack)
-//            ->attach(new Resolver\RelativeFallbackResolver($map))
-//            ->attach(new Resolver\RelativeFallbackResolver($stack));
-//
-//        $renderer->setResolver($resolver);
-//
-//        $view = new View();
-//        $response = new Response();
-//        $view->setResponse($response);
-//        $strategy = new PhpRendererStrategy($renderer);
-//        $strategy->attach($view->getEventManager());
-//
-//        /////////////////////////////////////////////////
-//
-//        $viewConfigExample = [
-//            'some-view' => [ // view name
-//                'template' => 'some-template', // html template
-//                //--- not required options
-//                'viewModel' => 'some-view-model|\Some\ViewModel::class', // Instance of ViewModel
-//                'extend' => 'parent-view', // extended view
-//                'capture' => 'some-capture', // for grouping views
-//                'children' => [
-//                    'child-view'// array of views
-//                ],
-//                'childrenDynamicLists' => [ // will be generated by list from one of child
-//                    'child-view' => 'listVar' // every entry in listVar will be setted to genereted child
-//                ],
-//                'data' => [ // required data
-//                    'fromGlobal' => 'varName' /* TODO as []*/, // // will be set as variables from global data
-//                    'fromParent' => 'varName' /* TODO as []*/, // will be set as variables by calling getVariable('varName') from parent
-//                    'static' => [ // will be set as variables
-//                        'key' => 'value'
-//                    ],/* TODO as string */
-//                ],
-//                /* TODO */'dataProvider' => 'some-view-model|\Some\DataProvider::class', // Instance of DataProvider
-//            ],
-//        ];
-//        //////////////
-//
-//
-//        $viewConfig = [
-//            'page' => [
-//                'template' => 'page',
-//                'children' => [
-//                    'comments-list',
-//                    'comment-create' => [
-//                        'template' => 'comment-create',
-//                        'children' => [
-//                            'myself-info' => [
-//                                'viewModel' => \Sebaks\ViewTest\MyselfViewModel::class,
-//                                'template' => 'user',
-//                            ],
-//                            'comment-create-form' => [
-//                                'template' => 'form',
-//                                'children' => [
-//                                    'form-element-textarea' => [
-//                                        'capture' => 'form-element', // for render as group
-//                                        'template' => 'form-element-textarea',
-//                                    ],
-//                                    'form-element-button' => [
-//                                        'capture' => 'form-element', // for render as group
-//                                        'template' => 'form-element-button',
-//                                    ],
-//                                ],
-//                            ],
-//                        ],
-//                    ],
-//                    'users-table' => [
-//                        'template' => 'table',
-//                        'children' => [
-//                            'table-head-rows' => [
-//                                'template' => 'table-tr',
-//                                'data' => [
-//                                    'fromParent' => 'rows',
-//                                ],
-//                                'children' => [
-//                                    'table-th' => [
-//                                        'template' => 'table-th',
-//                                        'capture' => 'table-td',
-//                                        'data' => [
-//                                            'fromParent' => 'value',
-//                                        ],
-//                                    ],
-//                                ],
-//                                'childrenDynamicLists' => [
-//                                    'table-th' => 'rows',
-//                                ],
-//                            ],
-//                            'table-body-rows' => [
-//                                'template' => 'table-tr',
-//                                'data' => [
-//                                    'fromParent' => 'rows',
-//                                ],
-//                                'children' => [
-//                                    'table-td' => [
-//                                        'template' => 'table-td',
-//                                        'data' => [
-//                                            'fromParent' => 'value',
-//                                        ],
-//                                    ],
-//                                ],
-//                                'childrenDynamicLists' => [
-//                                    'table-td' => 'rows',
-//                                ],
-//                            ],
-//                        ],
-//                        'childrenDynamicLists' => [
-//                            'table-body-rows' => 'bodyRows',
-//                            'table-head-rows' => 'headRows',
-//                        ],
-//                        'data' => [
-//                            'static' => [
-//                                'headRows' => [
-//                                    [
-//                                        'Id',
-//                                        'Name'
-//                                    ],
-//                                ],
-//                                'bodyRows' => [
-//                                    [
-//                                        '1',
-//                                        'John',
-//                                    ],
-//                                    [
-//                                        '2',
-//                                        'Helen',
-//                                    ],
-//                                ],
-//                            ],
-//                        ],
-//                    ],
-//                ],
-//            ],
-//            'comments-list' => [
-//                'template' => 'comments-list',
-//                'children' => [
-//                    'comment' => [
-//                        'viewModel' => \Sebaks\ViewTest\CommentViewModel::class,
-//                        'template' => 'comment',
-//                        'children' => [
-//                            'user' => [
-//                                'viewModel' => \Sebaks\ViewTest\UserViewModel::class,
-//                                'template' => 'user',
-//                                'data' => [
-//                                    'fromParent' => [
-//                                        'comment:userId' => 'userId'
-//                                    ],
-//                                    'static' => [ // will be set as variables
-//                                        'class' => 'user'
-//                                    ],
-//                                ],
-//                            ]
-//                        ],
-//                        'data' => [
-//                            'fromParent' => ['comment' =>'comment'], // will be set by calling getVariable('comment') from parent
-//                        ],
-//                    ],
-//                ],
-//                'childrenDynamicLists' => [
-//                    'comment' => 'comments', // Builder will create 'comment' views for every entry in 'comments' array
-//                ],
-//                'data' => [
-//                    'fromGlobal' => 'comments', // // will be set as variables from global data
-//                ],
-//            ],
-//        ];
-//
-//        $data = [
-//            'comments' => [
-//                [
-//                    'id' => 'c1',
-//                    'userId' => 'u1',
-//                    'text' => 'text of c1',
-//                ],
-//                [
-//                    'id' => 'c2',
-//                    'userId' => 'u2',
-//                    'text' => 'text of c2',
-//                ],
-//            ],
-//        ];
-//
-//        $serviceLocator = new \Zend\ServiceManager\ServiceManager();
-//
-//        $serviceLocator->setInvokableClass(\Sebaks\ViewTest\CommentViewModel::class, \Sebaks\ViewTest\CommentViewModel::class, false);
-//        $serviceLocator->setInvokableClass(\Sebaks\ViewTest\UserViewModel::class, \Sebaks\ViewTest\UserViewModel::class, false);
-//        $serviceLocator->setInvokableClass(\Sebaks\ViewTest\MyselfViewModel::class, \Sebaks\ViewTest\MyselfViewModel::class, false);
-//
-//
-//        /////////////////////
-//
-//        $config = new Config($viewConfig);
-//        $viewBuilder = new ViewBuilder($config, $serviceLocator);
-//        $pageViewModel = $viewBuilder->buildView($viewConfig['page'], array(), $data);
-//
-//        /////////////////////
-//
-//        $view->render($pageViewModel);
-//        $result = $response->getBody();
-//
-//        $expected = '<ul><li>text of c1<div class="user">John</div></li><li>text of c2<div class="user">Helen</div></li></ul>'
-//            .'<div class="">Me</div>'
-//            .'<form><textarea></textarea><button type="submit">Submit</button></form><table>
-//    <thead>
-//        <tr><th>Id</th><th>Name</th></tr>    </thead>
-//    <tbody>
-//        <tr><td>1</td><td>John</td></tr><tr><td>2</td><td>Helen</td></tr>    </tbody>
-//</table>';
-//
-//        $this->assertEquals($expected, $result);
-//    }
+    public function testChildrenAsArray()
+    {
+        $config = [
+            'someView' => [
+                'children' => [
+                    'childrenView' => [],
+                ],
+            ],
+        ];
+
+        $serviceLocator = new ServiceManager();
+        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
+
+        $viewModel = $viewBuilder->buildView($config['someView']);
+
+        $this->assertInstanceOf(ViewModel::class, $viewModel->getChildrenByCaptureTo('childrenView')[0]);
+    }
+
+    public function testChildrenAsString()
+    {
+        $config = [
+            'someView' => [
+                'children' => [
+                    'childrenView',
+                ],
+            ],
+            'childrenView' => []
+        ];
+
+        $serviceLocator = new ServiceManager();
+        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
+
+        $viewModel = $viewBuilder->buildView($config['someView']);
+
+        $this->assertInstanceOf(ViewModel::class, $viewModel->getChildrenByCaptureTo('childrenView')[0]);
+    }
+
+    public function testChildrenCapture()
+    {
+        $config = [
+            'someView' => [
+                'children' => [
+                    'childrenView' => [
+                        'capture' => 'childrenCapture'
+                    ]
+                ],
+            ],
+        ];
+
+        $serviceLocator = new ServiceManager();
+        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
+
+        $viewModel = $viewBuilder->buildView($config['someView']);
+
+        $this->assertInstanceOf(ViewModel::class, $viewModel->getChildrenByCaptureTo('childrenCapture')[0]);
+    }
+
+    public function testChildrenData()
+    {
+        $config = [
+            'someView' => [
+                'viewModel' => CustomViewModel::class,
+                'data' => [
+                    'static' => [
+                        'parentVar' => 'parentVarValue',
+                    ],
+                ],
+                'children' => [
+                    'childrenView' => [
+                        'data' => [
+                            'static' => [
+                                'staticVar' => 'staticVarValue',
+                            ],
+                            'fromGlobal' => [
+                                'globalVar' => 'globalVar',
+                            ],
+                            'fromParent' => [
+                                'parentVar' => 'parentVar',
+                                'parentCallVar' => 'parentVar2',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $globalData = [
+            'globalVar' => 'globalVarValue'
+        ];
+
+        $serviceLocator = new ServiceManager();
+        $serviceLocator->setInvokableClass(CustomViewModel::class, CustomViewModel::class, false);
+        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
+
+        $viewModel = $viewBuilder->buildView($config['someView'], [], $globalData);
+        $childrenView = $viewModel->getChildrenByCaptureTo('childrenView')[0];
+
+        $this->assertEquals('staticVarValue', $childrenView->getVariable('staticVar'));
+        $this->assertEquals('globalVarValue', $childrenView->getVariable('globalVar'));
+        $this->assertEquals('parentVarValue', $childrenView->getVariable('parentVar'));
+        $this->assertEquals('parentCallVarValue', $childrenView->getVariable('parentVar2'));
+    }
+
+    public function testChildrenDynamicList()
+    {
+        $config = [
+            'someView' => [
+                'data' => [
+                    'fromGlobal' => [
+                        'list' => 'list',
+                    ],
+                ],
+                'childrenDynamicLists' => [
+                    'childrenView' => 'list',
+                ],
+                'children' => [
+                    'childrenView' => [
+                        'data' => [
+                            'fromParent' => [
+                                'entry' => 'entry',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $globalData = [
+            'list' => [
+                ['value' => 'a'],
+                ['value' => 'b'],
+                ['value' => 'c'],
+            ],
+        ];
+
+        $serviceLocator = new ServiceManager();
+        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
+
+        $viewModel = $viewBuilder->buildView($config['someView'], [], $globalData);
+        $children = $viewModel->getChildrenByCaptureTo('childrenView');
+
+        $this->assertEquals('a', $children[0]->getVariable('entry')['value']);
+        $this->assertEquals('b', $children[1]->getVariable('entry')['value']);
+        $this->assertEquals('c', $children[2]->getVariable('entry')['value']);
+    }
+
+    public function testChildrenDynamicListCapture()
+    {
+        $config = [
+            'someView' => [
+                'data' => [
+                    'fromGlobal' => [
+                        'list' => 'list',
+                    ],
+                ],
+                'childrenDynamicLists' => [
+                    'childrenView' => 'list',
+                ],
+                'children' => [
+                    'childrenView' => [
+                        'capture' => 'childrenCapture'
+                    ],
+                ],
+            ],
+        ];
+        $globalData = [
+            'list' => [
+                ['value' => 'a'],
+                ['value' => 'b'],
+                ['value' => 'c'],
+            ],
+        ];
+
+        $serviceLocator = new ServiceManager();
+        $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
+
+        $viewModel = $viewBuilder->buildView($config['someView'], [], $globalData);
+        $children = $viewModel->getChildrenByCaptureTo('childrenCapture');
+
+        $this->assertInstanceOf(ViewModel::class, $children[0]);
+        $this->assertInstanceOf(ViewModel::class, $children[1]);
+        $this->assertInstanceOf(ViewModel::class, $children[2]);
+    }
+
+    public function testRender()
+    {
+        $renderer = new PhpRenderer();
+
+        $resolver = new Resolver\AggregateResolver();
+
+        $map = new Resolver\TemplateMapResolver(array(
+            'page'      => __DIR__ . '/view/page.phtml',
+            'comments-list' => __DIR__ . '/view/comments-list.phtml',
+            'comment' => __DIR__ . '/view/comment.phtml',
+            'user' => __DIR__ . '/view/user.phtml',
+        ));
+        $stack = new Resolver\TemplatePathStack(array(
+            'script_paths' => array(
+                __DIR__ . '/view',
+            )
+        ));
+
+        $resolver->attach($map)
+            ->attach($stack)
+            ->attach(new Resolver\RelativeFallbackResolver($map))
+            ->attach(new Resolver\RelativeFallbackResolver($stack));
+
+        $renderer->setResolver($resolver);
+
+        $view = new View();
+        $response = new Response();
+        $view->setResponse($response);
+        $strategy = new PhpRendererStrategy($renderer);
+        $strategy->attach($view->getEventManager());
+
+        /////////////////////////////////////////////////
+
+        $viewConfigExample = [
+            'some-view' => [ // view name
+                'template' => 'some-template', // html template
+                //--- not required options
+                'viewModel' => 'some-view-model|\Some\ViewModel::class', // Instance of ViewModel
+                'extend' => 'parent-view', // extended view
+                'capture' => 'some-capture', // for grouping views
+                'children' => [
+                    'child-view'// array of views
+                ],
+                'childrenDynamicLists' => [ // will be generated by list from one of child
+                    'child-view' => 'listVar' // every entry in listVar will be setted to genereted child
+                ],
+                'data' => [ // required data
+                    'fromGlobal' => 'varName' /* TODO as []*/, // // will be set as variables from global data
+                    'fromParent' => 'varName' /* TODO as []*/, // will be set as variables by calling getVariable('varName') from parent
+                    'static' => [ // will be set as variables
+                        'key' => 'value'
+                    ],/* TODO as string */
+                ],
+                /* TODO */'dataProvider' => 'some-view-model|\Some\DataProvider::class', // Instance of DataProvider
+            ],
+        ];
+        //////////////
+
+
+        $viewConfig = [
+            'page' => [
+                'template' => 'page',
+                'children' => [
+                    'comments-list',
+                    'comment-create' => [
+                        'template' => 'comment-create',
+                        'children' => [
+                            'myself-info' => [
+                                'viewModel' => \Sebaks\ViewTest\MyselfViewModel::class,
+                                'template' => 'user',
+                            ],
+                            'comment-create-form' => [
+                                'template' => 'form',
+                                'children' => [
+                                    'form-element-textarea' => [
+                                        'capture' => 'form-element', // for render as group
+                                        'template' => 'form-element-textarea',
+                                    ],
+                                    'form-element-button' => [
+                                        'capture' => 'form-element', // for render as group
+                                        'template' => 'form-element-button',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'users-table' => [
+                        'template' => 'table',
+                        'children' => [
+                            'table-head-rows' => [
+                                'template' => 'table-tr',
+                                'data' => [
+                                    'fromParent' => 'rows',
+                                ],
+                                'children' => [
+                                    'table-th' => [
+                                        'template' => 'table-th',
+                                        'capture' => 'table-td',
+                                        'data' => [
+                                            'fromParent' => 'value',
+                                        ],
+                                    ],
+                                ],
+                                'childrenDynamicLists' => [
+                                    'table-th' => 'rows',
+                                ],
+                            ],
+                            'table-body-rows' => [
+                                'template' => 'table-tr',
+                                'data' => [
+                                    'fromParent' => 'rows',
+                                ],
+                                'children' => [
+                                    'table-td' => [
+                                        'template' => 'table-td',
+                                        'data' => [
+                                            'fromParent' => 'value',
+                                        ],
+                                    ],
+                                ],
+                                'childrenDynamicLists' => [
+                                    'table-td' => 'rows',
+                                ],
+                            ],
+                        ],
+                        'childrenDynamicLists' => [
+                            'table-body-rows' => 'bodyRows',
+                            'table-head-rows' => 'headRows',
+                        ],
+                        'data' => [
+                            'static' => [
+                                'headRows' => [
+                                    [
+                                        'Id',
+                                        'Name'
+                                    ],
+                                ],
+                                'bodyRows' => [
+                                    [
+                                        '1',
+                                        'John',
+                                    ],
+                                    [
+                                        '2',
+                                        'Helen',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'comments-list' => [
+                'template' => 'comments-list',
+                'children' => [
+                    'comment' => [
+                        'viewModel' => \Sebaks\ViewTest\CommentViewModel::class,
+                        'template' => 'comment',
+                        'children' => [
+                            'user' => [
+                                'viewModel' => \Sebaks\ViewTest\UserViewModel::class,
+                                'template' => 'user',
+                                'data' => [
+                                    'fromParent' => [
+                                        'comment:userId' => 'userId'
+                                    ],
+                                    'static' => [ // will be set as variables
+                                        'class' => 'user'
+                                    ],
+                                ],
+                            ]
+                        ],
+                        'data' => [
+                            'fromParent' => ['comment' =>'comment'], // will be set by calling getVariable('comment') from parent
+                        ],
+                    ],
+                ],
+                'childrenDynamicLists' => [
+                    'comment' => 'comments', // Builder will create 'comment' views for every entry in 'comments' array
+                ],
+                'data' => [
+                    'fromGlobal' => 'comments', // // will be set as variables from global data
+                ],
+            ],
+        ];
+
+        $data = [
+            'comments' => [
+                [
+                    'id' => 'c1',
+                    'userId' => 'u1',
+                    'text' => 'text of c1',
+                ],
+                [
+                    'id' => 'c2',
+                    'userId' => 'u2',
+                    'text' => 'text of c2',
+                ],
+            ],
+        ];
+
+        $serviceLocator = new \Zend\ServiceManager\ServiceManager();
+
+        $serviceLocator->setInvokableClass(\Sebaks\ViewTest\CommentViewModel::class, \Sebaks\ViewTest\CommentViewModel::class, false);
+        $serviceLocator->setInvokableClass(\Sebaks\ViewTest\UserViewModel::class, \Sebaks\ViewTest\UserViewModel::class, false);
+        $serviceLocator->setInvokableClass(\Sebaks\ViewTest\MyselfViewModel::class, \Sebaks\ViewTest\MyselfViewModel::class, false);
+
+
+        /////////////////////
+
+        $config = new Config($viewConfig);
+        $viewBuilder = new ViewBuilder($config, $serviceLocator);
+        $pageViewModel = $viewBuilder->buildView($viewConfig['page'], array(), $data);
+
+        /////////////////////
+
+        $view->render($pageViewModel);
+        $result = $response->getBody();
+
+        $expected = '<ul><li>text of c1
+<div class="user">John</div></li><li>text of c2
+<div class="user">Helen</div></li></ul>
+<div class="">Me</div><form><textarea></textarea><button type="submit">Submit</button></form><table>
+    <thead>
+        <tr><th>Id</th><th>Name</th></tr>    </thead>
+    <tbody>
+        <tr><td>1</td><td>John</td></tr><tr><td>2</td><td>Helen</td></tr>    </tbody>
+</table>';
+
+        $this->assertEquals($expected, $result);
+    }
 }

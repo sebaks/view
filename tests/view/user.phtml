@@ -1,5 +1,6 @@
+
 <?php
 /** @var \Zend\View\Model\ViewModel $viewModel */
 $viewModel = $this->viewModel()->getCurrent();
 ?>
-<div class="<?= $viewModel->getVariable('class') ?>"><?= $viewModel->getVariable('name') ?></div>
+<div class="<?= $viewModel->getVariable('class') ?>"><?= $viewModel->getVariable('name') ?><?= $this->location ?></div>
