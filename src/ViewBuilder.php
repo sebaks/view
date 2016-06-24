@@ -43,6 +43,7 @@ class ViewBuilder
 
         while ($queue->count() > 0) {
             $options = $queue->dequeue();
+            $options = $this->config->applyInheritance($options);
 
             if (isset($options['viewModel'])) {
                 $this->serviceLocator->setShared($options['viewModel'], false);

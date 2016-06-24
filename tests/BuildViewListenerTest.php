@@ -84,7 +84,10 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
                     'layout' => 'layout',
                     'template' => 'page',
                     'children' => [
-                        'comments-list',
+                        'comments-list' => [
+                            'extend' => 'comments-list',
+                            'template' => 'comments-list',
+                        ],
                         'comment-create' => [
                             'template' => 'comment-create',
                             'children' => [
@@ -176,7 +179,6 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
             ],
             'blocks' => [
                 'comments-list' => [
-                    'template' => 'comments-list',
                     'children' => [
                         'comment' => [
                             'viewModel' => \Sebaks\ViewTest\CommentViewModel::class,

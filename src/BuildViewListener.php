@@ -28,6 +28,11 @@ class BuildViewListener extends AbstractListenerAggregate
             return;
         }
 
+        $response = $e->getResponse();
+        if ($response->getStatusCode() != 200) {
+            return;
+        }
+
         $matchedRoute = $e->getRouteMatch();
         if (!$matchedRoute) {
             return;
@@ -46,34 +51,23 @@ class BuildViewListener extends AbstractListenerAggregate
         $config = new Config(array_merge($options['layouts'], $options['contents'], $options['blocks']));
         $viewConfig = $config->applyInheritance($viewConfig);
         $viewBuilder = new ViewBuilder($config, $serviceLocator);
-        /** @var \Zend\View\Variables $data */
-        $data = $result->getVariables();
+        $data = $result->getVariables()->getArrayCopy();
 
-        $viewComponent = $viewBuilder->build($viewConfig, $data->getArrayCopy());
-
-        $response = $e->getResponse();
-        if ($response->getStatusCode() != 200) {
-            if ($result->getTemplate()) {
-                $viewComponent->setTemplate($result->getTemplate());
+        if (isset($viewConfig['layout'])) {
+            $viewComponentLayout = $viewConfig['layout'];
+            if (!isset($options['layouts'][$viewComponentLayout])) {
+                throw new \Exception("Layout '$viewComponentLayout' not found for view component '$matchedRouteName'");
             }
+
+            $options['layouts'][$viewComponentLayout]['children']['content'] = $viewConfig;
+
+            $viewComponent = $viewBuilder->build($options['layouts'][$viewComponentLayout], $data);
+        } else {
+            $viewComponent = $viewBuilder->build($viewConfig, $data);
         }
 
+        $viewComponent->setTerminal(true);
+        $e->setViewModel($viewComponent);
         $e->setResult($viewComponent);
-
-        if (!isset($viewConfig['layout'])) {
-            throw new \Exception("Missing required parameter 'layout' for view component '$matchedRouteName''");
-        }
-
-        $viewComponentLayout = $viewConfig['layout'];
-        if (!isset($options['layouts'][$viewComponentLayout])) {
-            throw new \Exception("Layout '$viewComponentLayout' not found for view component '$matchedRouteName'");
-        }
-
-        $layout = $viewBuilder->build($options['layouts'][$viewComponentLayout]);
-
-        $layout->addChild($viewComponent, 'content');
-        $layout->setTerminal(true);
-
-        $e->setViewModel($layout);
     }
 }
