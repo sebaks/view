@@ -21,9 +21,9 @@ class LocationViewModel extends ViewModel
     public function getVariable($name, $default = null)
     {
         if ($name == 'country') {
-            //if (self::$countries === null) {
+            if (self::$countries === null) {
                 self::$countries = $this->fetchCountries(self::$countryIds);
-            //}
+            }
             $countryId = $this->getVariable('countryId');
             if (isset(self::$countries[$countryId]['name'])) {
                 return self::$countries[$countryId]['name'];

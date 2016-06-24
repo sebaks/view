@@ -51,7 +51,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
         $serviceLocator->setInvokableClass(CustomViewModel::class, CustomViewModel::class, false);
 
         $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
-        $viewModel = $viewBuilder->buildView($config['someView']);
+        $viewModel = $viewBuilder->build($config['someView']);
 
         $this->assertInstanceOf(CustomViewModel::class, $viewModel);
     }
@@ -67,7 +67,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
         $serviceLocator = new ServiceManager();
         $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
 
-        $viewModel = $viewBuilder->buildView($config['someView']);
+        $viewModel = $viewBuilder->build($config['someView']);
 
         $this->assertEquals('some-template', $viewModel->getTemplate());
     }
@@ -83,7 +83,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
         $serviceLocator = new ServiceManager();
         $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
 
-        $viewModel = $viewBuilder->buildView($config['someView']);
+        $viewModel = $viewBuilder->build($config['someView']);
 
         $this->assertEquals('someCapture', $viewModel->captureTo());
     }
@@ -111,7 +111,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
         $serviceLocator = new ServiceManager();
         $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
 
-        $viewModel = $viewBuilder->buildView($config['someView'], [], $globalData);
+        $viewModel = $viewBuilder->build($config['someView'], $globalData);
 
         $this->assertEquals('staticVarValue', $viewModel->getVariable('staticVar'));
         $this->assertEquals('globalVarValue', $viewModel->getVariable('globalVar'));
@@ -131,7 +131,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
         $serviceLocator = new ServiceManager();
         $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
 
-        $viewModel = $viewBuilder->buildView($config['someView']);
+        $viewModel = $viewBuilder->build($config['someView']);
 
         $this->assertInstanceOf(ViewModel::class, $viewModel->getChildrenByCaptureTo('childrenView')[0]);
     }
@@ -150,7 +150,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
         $serviceLocator = new ServiceManager();
         $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
 
-        $viewModel = $viewBuilder->buildView($config['someView']);
+        $viewModel = $viewBuilder->build($config['someView']);
 
         $this->assertInstanceOf(ViewModel::class, $viewModel->getChildrenByCaptureTo('childrenView')[0]);
     }
@@ -170,7 +170,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
         $serviceLocator = new ServiceManager();
         $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
 
-        $viewModel = $viewBuilder->buildView($config['someView']);
+        $viewModel = $viewBuilder->build($config['someView']);
 
         $this->assertInstanceOf(ViewModel::class, $viewModel->getChildrenByCaptureTo('childrenCapture')[0]);
     }
@@ -211,7 +211,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
         $serviceLocator->setInvokableClass(CustomViewModel::class, CustomViewModel::class, false);
         $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
 
-        $viewModel = $viewBuilder->buildView($config['someView'], [], $globalData);
+        $viewModel = $viewBuilder->build($config['someView'], $globalData);
         $childrenView = $viewModel->getChildrenByCaptureTo('childrenView')[0];
 
         $this->assertEquals('staticVarValue', $childrenView->getVariable('staticVar'));
@@ -254,7 +254,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
         $serviceLocator = new ServiceManager();
         $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
 
-        $viewModel = $viewBuilder->buildView($config['someView'], [], $globalData);
+        $viewModel = $viewBuilder->build($config['someView'], $globalData);
         $children = $viewModel->getChildrenByCaptureTo('childrenView');
 
         $this->assertEquals('a', $children[0]->getVariable('entry')['value']);
@@ -292,7 +292,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
         $serviceLocator = new ServiceManager();
         $viewBuilder = new ViewBuilder(new Config($config), $serviceLocator);
 
-        $viewModel = $viewBuilder->buildView($config['someView'], [], $globalData);
+        $viewModel = $viewBuilder->build($config['someView'], $globalData);
         $children = $viewModel->getChildrenByCaptureTo('childrenCapture');
 
         $this->assertInstanceOf(ViewModel::class, $children[0]);
@@ -466,22 +466,24 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
                                     'fromParent' => [
                                         'comment:userId' => 'userId'
                                     ],
-                                    'static' => [ // will be set as variables
+                                    'static' => [
                                         'class' => 'user'
                                     ],
                                 ],
                             ]
                         ],
                         'data' => [
-                            'fromParent' => ['comment' =>'comment'], // will be set by calling getVariable('comment') from parent
+                            'fromParent' => [
+                                'comment' =>'comment'
+                            ],
                         ],
                     ],
                 ],
                 'childrenDynamicLists' => [
-                    'comment' => 'comments', // Builder will create 'comment' views for every entry in 'comments' array
+                    'comment' => 'comments',
                 ],
                 'data' => [
-                    'fromGlobal' => 'comments', // // will be set as variables from global data
+                    'fromGlobal' => 'comments',
                 ],
             ],
         ];
@@ -512,7 +514,7 @@ class ViewBuilderTest extends \PHPUnit_Framework_TestCase
 
         $config = new Config($viewConfig);
         $viewBuilder = new ViewBuilder($config, $serviceLocator);
-        $pageViewModel = $viewBuilder->buildView($viewConfig['page'], array(), $data);
+        $pageViewModel = $viewBuilder->build($viewConfig['page'], $data);
 
         /////////////////////
 

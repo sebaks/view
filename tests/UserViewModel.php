@@ -21,9 +21,10 @@ class UserViewModel extends ViewModel
     public function getVariable($name, $default = null)
     {
         if ($name == 'name' || $name == 'countryId') {
-            //if (self::$users === null) {
+
+            if (self::$users === null) {
                 self::$users = $this->fetchUsers(self::$userIds);
-            //}
+            }
             $userId = $this->getVariable('userId');
             if (isset(self::$users[$userId][$name])) {
                 return self::$users[$userId][$name];

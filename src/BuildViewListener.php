@@ -46,9 +46,10 @@ class BuildViewListener extends AbstractListenerAggregate
         $config = new Config(array_merge($options['layouts'], $options['contents'], $options['blocks']));
         $viewConfig = $config->applyInheritance($viewConfig);
         $viewBuilder = new ViewBuilder($config, $serviceLocator);
+        /** @var \Zend\View\Variables $data */
         $data = $result->getVariables();
 
-        $viewComponent = $viewBuilder->buildView($viewConfig, [], $data);
+        $viewComponent = $viewBuilder->build($viewConfig, $data->getArrayCopy());
 
         $response = $e->getResponse();
         if ($response->getStatusCode() != 200) {
@@ -68,7 +69,7 @@ class BuildViewListener extends AbstractListenerAggregate
             throw new \Exception("Layout '$viewComponentLayout' not found for view component '$matchedRouteName'");
         }
 
-        $layout = $viewBuilder->buildView($options['layouts'][$viewComponentLayout]);
+        $layout = $viewBuilder->build($options['layouts'][$viewComponentLayout]);
 
         $layout->addChild($viewComponent, 'content');
         $layout->setTerminal(true);

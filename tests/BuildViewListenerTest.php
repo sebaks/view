@@ -292,9 +292,13 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
         $graph = [
             1 => [
                 'value' => '1',
+                'data' => [
+                    'd1' => 'v1'
+                ],
                 'children' => [
                     2 => [
                         'value' => '2',
+                        'fromParent' => 'd1'
                     ],
                     3 => [
                         'value' => '3',
@@ -323,7 +327,7 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
         ];
 
         $startNode = 1;
-        $values = [];
+        $views = [];
 
         $visited = array();
         $queue = new \SplQueue();
@@ -332,24 +336,59 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
         $visited[] = $startNode;
 
         while ($queue->count() > 0) {
-            $currentNodeAdj = $queue->dequeue();
+            $current = $queue->dequeue();
 
-            if (!empty($currentNodeAdj['children'] )) {
-                foreach ($currentNodeAdj['children'] as $nodeId => $vertex) {
+            if (!empty($current['children'] )) {
+                foreach ($current['children'] as $viewId => $child) {
 
-                    if (!in_array($nodeId, $visited)) {
-                        $queue->enqueue($vertex);
+                    if (!in_array($viewId, $visited)) {
+                        $child['parent'] = $current;
+                        $queue->enqueue($child);
                     }
 
-                    $visited[] = $nodeId;
+                    $visited[] = $viewId;
                 }
             }
 
-
-
-            $values[] = $currentNodeAdj['value'];
+            $view = [
+                'value' => $current['value'],
+            ];
+            if (isset($current['parent']) && isset($current['fromParent'])) {
+                $view['data'][$current['fromParent']] = $current['parent']['data'][$current['fromParent']];
+            }
+            $views[] = $view;
         }
 
-        $this->assertEquals('12345678', implode($values));
+        $expected = [
+            [
+                'value' => '1',
+            ],
+            [
+                'value' => '2',
+                'data' => [
+                    'd1' => 'v1'
+                ],
+            ],
+            [
+                'value' => '3',
+            ],
+            [
+                'value' => '4',
+            ],
+            [
+                'value' => '5',
+            ],
+            [
+                'value' => '6',
+            ],
+            [
+                'value' => '7',
+            ],
+            [
+                'value' => '8',
+            ],
+        ];
+
+        $this->assertEquals($expected, $views);
     }
 }
