@@ -84,7 +84,10 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
                     'layout' => 'layout',
                     'template' => 'page',
                     'children' => [
-                        'comments-list',
+                        'comments-list' => [
+                            'extend' => 'comments-list',
+                            'template' => 'comments-list',
+                        ],
                         'comment-create' => [
                             'template' => 'comment-create',
                             'children' => [
@@ -176,7 +179,6 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
             ],
             'blocks' => [
                 'comments-list' => [
-                    'template' => 'comments-list',
                     'children' => [
                         'comment' => [
                             'viewModel' => \Sebaks\ViewTest\CommentViewModel::class,
@@ -274,7 +276,10 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
         $view->render($pageViewModel);
         $result = $response->getBody();
 
-        $expected = '<body><ul><li>text of c1<div class="user">John<span class="location">Ukraine</span></div></li><li>text of c2<div class="user">Helen<span class="location">United States</span></div></li></ul><div class="">Me</div><form><textarea></textarea><button type="submit">Submit</button></form><table>
+        $expected = '<body><ul><li>text of c1
+<div class="user">John<span class="location">Ukraine</span></div></li><li>text of c2
+<div class="user">Helen<span class="location">United States</span></div></li></ul>
+<div class="">Me</div><form><textarea></textarea><button type="submit">Submit</button></form><table>
     <thead>
         <tr><th>Id</th><th>Name</th></tr>    </thead>
     <tbody>
@@ -282,5 +287,110 @@ class BuildViewListenerTest extends \PHPUnit_Framework_TestCase
 </table></body>';
 
         $this->assertEquals($expected, $result);
+    }
+
+    public function testBFS()
+    {
+        $graph = [
+            1 => [
+                'value' => '1',
+                'data' => [
+                    'd1' => 'v1'
+                ],
+                'children' => [
+                    2 => [
+                        'value' => '2',
+                        'fromParent' => 'd1'
+                    ],
+                    3 => [
+                        'value' => '3',
+                        'children' => [
+                            5 => [
+                                'value' => '5',
+                                'children' => [
+                                    7 => [
+                                        'value' => '7',
+                                    ],
+                                    8 => [
+                                        'value' => '8',
+                                    ],
+                                ],
+                            ],
+                            6 => [
+                                'value' => '6',
+                            ],
+                        ]
+                    ],
+                    4 => [
+                        'value' => '4',
+                    ],
+                ]
+            ],
+        ];
+
+        $startNode = 1;
+        $views = [];
+
+        $visited = array();
+        $queue = new \SplQueue();
+
+        $queue->enqueue($graph[$startNode]);
+        $visited[] = $startNode;
+
+        while ($queue->count() > 0) {
+            $current = $queue->dequeue();
+
+            if (!empty($current['children'] )) {
+                foreach ($current['children'] as $viewId => $child) {
+
+                    if (!in_array($viewId, $visited)) {
+                        $child['parent'] = $current;
+                        $queue->enqueue($child);
+                    }
+
+                    $visited[] = $viewId;
+                }
+            }
+
+            $view = [
+                'value' => $current['value'],
+            ];
+            if (isset($current['parent']) && isset($current['fromParent'])) {
+                $view['data'][$current['fromParent']] = $current['parent']['data'][$current['fromParent']];
+            }
+            $views[] = $view;
+        }
+
+        $expected = [
+            [
+                'value' => '1',
+            ],
+            [
+                'value' => '2',
+                'data' => [
+                    'd1' => 'v1'
+                ],
+            ],
+            [
+                'value' => '3',
+            ],
+            [
+                'value' => '4',
+            ],
+            [
+                'value' => '5',
+            ],
+            [
+                'value' => '6',
+            ],
+            [
+                'value' => '7',
+            ],
+            [
+                'value' => '8',
+            ],
+        ];
+
+        $this->assertEquals($expected, $views);
     }
 }

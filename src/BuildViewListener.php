@@ -51,7 +51,7 @@ class BuildViewListener extends AbstractListenerAggregate
         $config = new Config(array_merge($options['layouts'], $options['contents'], $options['blocks']));
         $viewConfig = $config->applyInheritance($viewConfig);
         $viewBuilder = new ViewBuilder($config, $serviceLocator);
-        $data = $result->getVariables();
+        $data = $result->getVariables()->getArrayCopy();
 
         if (isset($viewConfig['layout'])) {
             $viewComponentLayout = $viewConfig['layout'];
@@ -61,9 +61,9 @@ class BuildViewListener extends AbstractListenerAggregate
 
             $options['layouts'][$viewComponentLayout]['children']['content'] = $viewConfig;
 
-            $viewComponent = $viewBuilder->buildView($options['layouts'][$viewComponentLayout], [], $data);
+            $viewComponent = $viewBuilder->build($options['layouts'][$viewComponentLayout], $data);
         } else {
-            $viewComponent = $viewBuilder->buildView($viewConfig, [], $data);
+            $viewComponent = $viewBuilder->build($viewConfig, $data);
         }
 
         $viewComponent->setTerminal(true);
