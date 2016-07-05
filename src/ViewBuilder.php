@@ -28,21 +28,6 @@ class ViewBuilder
         $this->serviceLocator = $serviceLocator;
     }
 
-    private function getVarValue($varName, $data)
-    {
-        if (strpos($varName, ':') !== false) {
-            list($varArrayName, $varNameInArray) = explode(':', $varName);
-
-            if (isset($data[$varArrayName][$varNameInArray])) {
-                return $data[$varArrayName][$varNameInArray];
-            }
-        }
-
-        if (isset($data[$varName])) {
-            return $data[$varName];
-        }
-    }
-
     /**
      * @param $config
      * @param array $data
@@ -218,6 +203,11 @@ class ViewBuilder
         return $rootViewModel;
     }
 
+    /**
+     * @param string $varName
+     * @param array $data
+     * @return mixed
+     */
     private function getVarValue($varName, $data)
     {
         if (strpos($varName, ':') !== false) {
