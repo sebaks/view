@@ -4,6 +4,7 @@ namespace Sebaks\View;
 
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
 use Zend\EventManager\EventInterface;
+use Zend\Mvc\MvcEvent;
 
 class Module implements BootstrapListenerInterface
 {
@@ -13,6 +14,13 @@ class Module implements BootstrapListenerInterface
         $eventManager = $e->getApplication()->getEventManager();
 
         $injectLayoutListener = new BuildViewListener();
-        $eventManager->attach($injectLayoutListener);
+
+        $sharedEvents = $eventManager->getSharedManager();
+        $sharedEvents->attach(
+            'Zend\Stdlib\DispatchableInterface',
+            MvcEvent::EVENT_DISPATCH,
+            [$injectLayoutListener, 'injectLayout'],
+            -70
+        );
     }
 }
