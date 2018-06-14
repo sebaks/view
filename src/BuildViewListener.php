@@ -2,20 +2,12 @@
 
 namespace Sebaks\View;
 
-use Zend\EventManager\AbstractListenerAggregate;
-use Zend\EventManager\EventManagerInterface as Events;
 use Zend\Mvc\MvcEvent;
 use Zend\Http\Request as HttpRequest;
 use Zend\View\Model\ViewModel as ZendViewModel;
 
-class BuildViewListener extends AbstractListenerAggregate
+class BuildViewListener
 {
-    public function attach(Events $events)
-    {
-        $sharedEvents = $events->getSharedManager();
-        $sharedEvents->attach('Zend\Stdlib\DispatchableInterface', MvcEvent::EVENT_DISPATCH, [$this, 'injectLayout'], -70);
-    }
-
     public function injectLayout(MvcEvent $e)
     {
         $request = $e->getRequest();
